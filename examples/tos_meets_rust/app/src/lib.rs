@@ -11,6 +11,9 @@ use cty::*;
 pub extern "C" fn application_entry_rust() -> c_void {
     unsafe {
         rust_print(b"[+] Welcome to the RUST-WORLD in TencentOS :)".as_ptr());
+        rust_oled_init();
+        rust_oled_clear();
+        rust_oled_print(0,0,b"TencentOS RUST\0".as_ptr());
         rust_mqtt_daemon();
     }
 

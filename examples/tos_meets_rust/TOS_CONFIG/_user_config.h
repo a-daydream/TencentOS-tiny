@@ -1,11 +1,11 @@
 #ifndef _USER_CONFIG
 #define _USER_CONFIG
 
-#define PRODUCT_ID "BDDSF87WEA"
-#define DEVICE_NAME "dev001"
-#define DEVICE_KEY "2/sOZRAJ6B+vMNNXS41w5g=="
+#define PRODUCT_ID "359R72KXAO"
+#define DEVICE_NAME "dev"
+#define DEVICE_KEY "NRA3ksHqTkCohpXN625Bjw=="
 
-#define WIFI_NAME "1234"
+#define WIFI_NAME "Xiaomi307"
 #define WIFI_PASSWORD "12345678"
 
 #endif

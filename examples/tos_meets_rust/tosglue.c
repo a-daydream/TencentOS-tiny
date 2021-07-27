@@ -39,9 +39,9 @@ void rust_mqtt_daemon()
 {
     char *str = "TencentOS XXXX";
 
-    OLED_Init();
-    OLED_Clear();
-    OLED_ShowString(0, 0, (uint8_t*)str, 16);
+    // OLED_Init();
+    // OLED_Clear();
+    // OLED_ShowString(0, 0, (uint8_t*)str, 16);
 
 
     int ret = 0;
@@ -178,8 +178,16 @@ void rust_print(const char *msg) {
     printf("%s\r\n", msg);
 }
 
+void rust_oled_init(){
+    OLED_Init();
+}
+
+void rust_oled_clear(){
+    OLED_Clear();
+}
+
 void rust_oled_print(unsigned int x, unsigned int y, char *msg) {
-    OLED_ShowString(0, 2, (uint8_t*)msg, 16);
+    OLED_ShowString(x, y, (uint8_t*)msg, 16);
 }
 
 int rust_wifi_init() {
