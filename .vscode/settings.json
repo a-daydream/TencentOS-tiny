@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "tos_k.h": "c",
+        "tos_mail_queue.h": "c"
+    }
+}

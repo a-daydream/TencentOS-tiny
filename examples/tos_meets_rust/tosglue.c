@@ -40,8 +40,8 @@ void rust_mqtt_daemon()
     char *str = "TencentOS XXXX";
 
     // OLED_Init();
-    // OLED_Clear();
-    // OLED_ShowString(0, 0, (uint8_t*)str, 16);
+    OLED_Clear();
+    OLED_ShowString(0, 0, (uint8_t*)str, 16);
 
 
     int ret = 0;
@@ -174,10 +174,46 @@ void rust_mqtt_daemon()
     }
 }
 
+//tos_mail
+
+__API__ k_err_t rust_tos_mail_q_create(void *pool, size_t mail_cnt, size_t mail_size){
+    return tos_mail_q_create(&mail_q,pool,mail_cnt,mail_size);
+}
+
+// __API__ k_err_t rust_tos_mail_q_post(k_mail_q_t *mail_q, void *mail_buf, size_t mail_size){
+//     return tos_mail_q_post(mail_q,mail_buf,mail_size);
+// }
+
+// __API__ k_err_t rust_tos_mail_q_pend(k_mail_q_t *mail_q, void *mail_buf, size_t *mail_size, k_tick_t timeout){
+//     return tos_mail_q_pend(mail_q,mail_buf,mail_size,timeout);
+// }
+
+//CMSIS
+int rust_osKernelRunning(){
+    return osKernelRunning();
+}
+
+//system management
+int rust_tos_knl_is_running(){
+    return tos_knl_is_running();
+}
+
+
+
 void rust_print(const char *msg) {
     printf("%s\r\n", msg);
 }
 
+void rust_print_num(int num){
+    printf("this num = %d\n",num);
+}
+
+// uint32_t
+uint32_t rust_osKernelSysTick(){
+    return osKernelSysTick();
+}
+
+//OLED
 void rust_oled_init(){
     OLED_Init();
 }
@@ -190,6 +226,8 @@ void rust_oled_print(unsigned int x, unsigned int y, char *msg) {
     OLED_ShowString(x, y, (uint8_t*)msg, 16);
 }
 
+
+//wifi
 int rust_wifi_init() {
     return esp8266_tencent_firmware_sal_init(HAL_UART_PORT_2);
 }
@@ -198,6 +236,8 @@ void rust_wifi_connect(const char *ssid, const char *psd) {
     esp8266_tencent_firmware_join_ap(ssid, psd);
 }
 
+
+//
 void rust_sleep(unsigned int ms) {
     tos_sleep_ms(ms);
 }
