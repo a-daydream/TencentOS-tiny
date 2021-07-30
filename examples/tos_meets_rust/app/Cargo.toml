@@ -12,6 +12,7 @@ cty = "0.2.0"        # String utilities from cty library: https://crates.io/crat
 cstr_core = "0.1.2"  # String utilities from cstr_core library: https://crates.io/crates/cstr_core
 cortex-m = "0.5.8"   # Arm Cortex-M utilities: https://crates.io/crates/cortex-m
 
+
 [lib]
 name = "tosrs"
 test = false

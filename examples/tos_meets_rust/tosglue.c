@@ -176,7 +176,7 @@ void rust_mqtt_daemon()
 
 //tos_mail
 
-__API__ k_err_t rust_tos_mail_q_create(void *pool, size_t mail_cnt, size_t mail_size){
+__API__ k_err_t rust_tos_mail_q_create(k_mail_q_t *mail_q, void *pool, size_t mail_cnt, size_t mail_size){
     return tos_mail_q_create(&mail_q,pool,mail_cnt,mail_size);
 }
 
@@ -187,6 +187,62 @@ __API__ k_err_t rust_tos_mail_q_create(void *pool, size_t mail_cnt, size_t mail_
 // __API__ k_err_t rust_tos_mail_q_pend(k_mail_q_t *mail_q, void *mail_buf, size_t *mail_size, k_tick_t timeout){
 //     return tos_mail_q_pend(mail_q,mail_buf,mail_size,timeout);
 // }
+
+
+//tos event
+__API__ k_err_t rust_tos_event_create(k_event_t *event, k_event_flag_t init_flag){
+    return tos_event_create(event,init_flag);
+}
+
+__API__ k_err_t rust_tos_event_destroy(k_event_t *event){
+    return tos_event_destroy(event);
+}
+__API__ k_err_t rust_tos_event_pend(k_event_t *event, k_event_flag_t flag_expect, k_event_flag_t *flag_match, k_tick_t timeout, k_opt_t opt_pend){
+    return tos_event_pend(event,flag_expect,flag_match,timeout,opt_pend);
+}
+
+__API__ k_err_t rust_tos_event_post(k_event_t *event, k_event_flag_t flag){
+    return tos_event_post(event,flag);
+}
+
+__API__ k_err_t rust_tos_event_post_keep(k_event_t *event, k_event_flag_t flag){
+    return tos_event_post_keep(event,flag);
+}
+
+
+//tos_sem
+__API__ k_err_t rust_tos_sem_create_max(k_sem_t *sem, k_sem_cnt_t init_count, k_sem_cnt_t max_count){
+    return tos_sem_create_max(sem,init_count,max_count);
+}
+
+__API__ k_err_t rust_tos_sem_create(k_sem_t *sem, k_sem_cnt_t init_count){
+    return tos_sem_create(sem,init_count);
+}
+
+__API__ k_err_t rust_tos_sem_create_max_dyn(k_sem_t **sem, k_sem_cnt_t init_count, k_sem_cnt_t max_count){
+    return tos_sem_create_max_dyn(sem,init_count,max_count);
+}
+
+__API__ k_err_t rust_tos_sem_create_dyn(k_sem_t **sem, k_sem_cnt_t init_count){
+    return tos_sem_create_dyn(sem,init_count);
+}
+
+__API__ k_err_t rust_tos_sem_destroy(k_sem_t *sem){
+    return tos_sem_destroy(sem);
+}
+
+__API__ k_err_t rust_tos_sem_pend(k_sem_t *sem, k_tick_t timeout){
+    return tos_sem_pend(sem,timeout);
+}
+
+__API__ k_err_t rust_tos_sem_post(k_sem_t *sem){
+    return tos_sem_post(sem);
+}
+
+__API__ k_err_t rust_tos_sem_post_all(k_sem_t *sem){
+    return tos_sem_post_all(sem);
+}   
+ 
 
 //CMSIS
 int rust_osKernelRunning(){
@@ -204,7 +260,7 @@ void rust_print(const char *msg) {
     printf("%s\r\n", msg);
 }
 
-void rust_print_num(int num){
+void rust_print_num(size_t num){
     printf("this num = %d\n",num);
 }
 
