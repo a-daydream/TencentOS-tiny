@@ -232,6 +232,24 @@ impl Default for k_sem_st {
 }
 pub type k_sem_t = k_sem_st;
 
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct k_char_fifo_st {
+    pub knl_obj: knl_obj_t,
+    pub ring_q: k_ring_q_t,
+}
+
+impl Default for k_char_fifo_st {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+pub type k_chr_fifo_t = k_char_fifo_st;
+
 
 
 
@@ -251,8 +269,15 @@ extern {
 
 
     //tos_mail
+    pub fn rust_tos_mail_q_create(
+        mail_q: *mut k_mail_q_t,
+        pool: *mut ::core::ffi::c_void,
+        mail_cnt: usize,
+        mail_size: usize,
+    ) -> k_err_t;
 
 
+    
     //tos_event
     pub fn rust_tos_event_create(event : *mut k_event_t , init_flag :  k_event_flag_t) -> k_err_en;
     pub fn rust_tos_event_destroy(event : *mut k_event_t) -> k_err_en;
@@ -265,6 +290,9 @@ extern {
         timeout: k_tick_t,
         opt_pend: k_opt_t,
     ) -> k_err_t;
+
+
+
 
     //tos_sem 
     pub fn rust_tos_sem_create_max(
@@ -293,15 +321,66 @@ extern {
 
 
 
+
+    //tos_chr_fifo
+    pub fn rust_tos_chr_fifo_create(
+        chr_fifo: *mut k_chr_fifo_t,
+        buffer: *mut ::core::ffi::c_void,
+        size: usize,
+    ) -> k_err_t;
+
+    pub fn rust_tos_chr_fifo_destroy(chr_fifo: *mut k_chr_fifo_t) -> k_err_t;
+
+    pub fn rust_tos_chr_fifo_create_dyn(
+        chr_fifo: *mut k_chr_fifo_t,
+        fifo_size: usize,
+    ) -> k_err_t;
+
+    pub fn rust_tos_chr_fifo_destroy_dyn(chr_fifo: *mut k_chr_fifo_t) -> k_err_t;
+
+    pub fn rust_tos_chr_fifo_push(chr_fifo: *mut k_chr_fifo_t, data: c_char)
+        -> k_err_t;
+
+    pub fn rust_tos_chr_fifo_push_stream(
+        chr_fifo: *mut k_chr_fifo_t,
+        stream: *mut u8,
+        size: usize,
+    ) -> i32;
+
+    pub fn rust_tos_chr_fifo_pop(
+        chr_fifo: *mut k_chr_fifo_t,
+        out: *mut u8,
+    ) -> k_err_t;
+
+    pub fn rust_tos_chr_fifo_pop_stream(
+        chr_fifo: *mut k_chr_fifo_t,
+        buffer: *mut u8,
+        size: usize,
+    ) -> i32;
+
+    pub fn rust_tos_chr_fifo_flush(chr_fifo: *mut k_chr_fifo_t) -> k_err_t;
+
+    pub fn rust_tos_chr_fifo_is_empty(chr_fifo: *mut k_chr_fifo_t) -> i32;
+
+    pub fn rust_tos_chr_fifo_is_full(chr_fifo: *mut k_chr_fifo_t) -> i32;
+
+
+
+
+
+
+
     //OLED
     pub fn rust_oled_print(x : u32, y : u32 ,msg: *const u8);
     pub fn rust_oled_init();
     pub fn rust_oled_clear();  
 
 
-    pub fn rust_print_num(num : usize);
+    pub fn rust_print_num(num : u32);
 
     pub fn rust_print(msg: *const u8);
+
+    pub fn rust_print_char(msg: *const u8);
     
     //wifi
     pub fn rust_wifi_init() -> c_int;
@@ -309,4 +388,7 @@ extern {
     
     pub fn rust_sleep(ms: u32);
     pub fn rust_mqtt_daemon() -> c_void;
+   
 }
+
+

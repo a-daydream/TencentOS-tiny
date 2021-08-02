@@ -39,7 +39,7 @@ void rust_mqtt_daemon()
 {
     char *str = "TencentOS XXXX";
 
-    // OLED_Init();
+    OLED_Init();
     OLED_Clear();
     OLED_ShowString(0, 0, (uint8_t*)str, 16);
 
@@ -177,7 +177,7 @@ void rust_mqtt_daemon()
 //tos_mail
 
 __API__ k_err_t rust_tos_mail_q_create(k_mail_q_t *mail_q, void *pool, size_t mail_cnt, size_t mail_size){
-    return tos_mail_q_create(&mail_q,pool,mail_cnt,mail_size);
+    return tos_mail_q_create(mail_q,pool,mail_cnt,mail_size);
 }
 
 // __API__ k_err_t rust_tos_mail_q_post(k_mail_q_t *mail_q, void *mail_buf, size_t mail_size){
@@ -242,7 +242,61 @@ __API__ k_err_t rust_tos_sem_post(k_sem_t *sem){
 __API__ k_err_t rust_tos_sem_post_all(k_sem_t *sem){
     return tos_sem_post_all(sem);
 }   
- 
+
+//tos_chr_fifo
+k_err_t rust_tos_chr_fifo_create(k_chr_fifo_t *chr_fifo, void *buffer, size_t  size){
+    return tos_chr_fifo_create(chr_fifo,buffer,size);
+}
+
+
+k_err_t rust_tos_chr_fifo_destroy(k_chr_fifo_t *chr_fifo){
+    return tos_chr_fifo_destroy(chr_fifo);
+}
+
+
+k_err_t rust_tos_chr_fifo_create_dyn(k_chr_fifo_t *chr_fifo, size_t  fifo_size){
+    return tos_chr_fifo_create_dyn(chr_fifo,fifo_size);
+}
+
+
+k_err_t rust_tos_chr_fifo_destroy_dyn(k_chr_fifo_t *chr_fifo){
+    return tos_chr_fifo_destroy_dyn(chr_fifo);
+}
+
+
+k_err_t rust_tos_chr_fifo_push(k_chr_fifo_t *chr_fifo, uint8_t data){
+    return tos_chr_fifo_push(chr_fifo,data);
+}
+
+int ust_tos_chr_fifo_push_stream(k_chr_fifo_t *chr_fifo, uint8_t *stream, size_t size){
+    return tos_chr_fifo_push_stream(chr_fifo,stream,size);
+}
+
+
+k_err_t rust_tos_chr_fifo_pop(k_chr_fifo_t *chr_fifo, uint8_t *out){
+    k_err_t kerr = tos_chr_fifo_pop(chr_fifo,out);
+    return kerr;
+}
+
+
+int rust_tos_chr_fifo_pop_stream(k_chr_fifo_t *chr_fifo, uint8_t *buffer, size_t size){
+    return tos_chr_fifo_pop_stream(chr_fifo,buffer,size);
+}
+
+
+k_err_t rust_tos_chr_fifo_flush(k_chr_fifo_t *chr_fifo){
+    return tos_chr_fifo_flush(chr_fifo);
+}
+
+
+int rust_tos_chr_fifo_is_empty(k_chr_fifo_t *chr_fifo){
+    return tos_chr_fifo_is_empty(chr_fifo);
+}
+
+
+int rust_tos_chr_fifo_is_full(k_chr_fifo_t *chr_fifo){
+    return tos_chr_fifo_is_full(chr_fifo);
+}
 
 //CMSIS
 int rust_osKernelRunning(){
@@ -259,6 +313,11 @@ int rust_tos_knl_is_running(){
 void rust_print(const char *msg) {
     printf("%s\r\n", msg);
 }
+
+void rust_print_char(const char *msg) {
+    printf("This char is %c.\r\n", *msg);
+}
+
 
 void rust_print_num(size_t num){
     printf("this num = %d\n",num);
