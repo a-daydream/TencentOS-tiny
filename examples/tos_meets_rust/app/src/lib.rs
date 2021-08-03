@@ -15,11 +15,12 @@ use cty::*;
 #[no_mangle]
 pub extern "C" fn application_entry_rust() -> c_void {
     unsafe {
-        rust_print(b"[+] Welcome to the RUST-WORLD in TencentOS :)".as_ptr());
+        rust_print(b"[+] Welcome to the RUST-WORLD in TencentOS :)\r\n".as_ptr());
 
         rust_oled_init();
         rust_oled_clear();
         rust_oled_print(0,0,b"TencentOS RUST\0".as_ptr());
+        // rust_print(b"[+] This is a mqtt demo!".as_ptr());
 
         // let  mut mail_struct = k_mail_q_t::default();
         // let  mut pool:[i32;4] = [-1;4];
@@ -49,11 +50,16 @@ pub extern "C" fn application_entry_rust() -> c_void {
         //         rust_oled_print(0,0,b"RUST: sem_test test failed\0".as_ptr());
         //     }
         // }
+
+        // ************************start tos_task_test***************************
+        // rust_test_tos_task_create();
+        rust_test_tos_task_destroy();
+        //*************************end of tos_task_test**************************
         
         // ************************start tos_chr_fifo_test***********************
         // rust_test_tos_fifo_create();
         // rust_test_tos_fifo_destory();
-        rust_test_tos_fifo_char_push();
+        // rust_test_tos_fifo_char_push();
         // rust_test_tos_fifo_char_push_dyn();
         // rust_test_tos_fifo_stream_push();
         //*************************end of tos_chr_fifo_test**********************
@@ -89,44 +95,105 @@ unsafe extern "C" fn  test_task_entry(arg : *mut c_void)
 }
 
 pub fn rust_test_tos_task_create(){
-    let mut test_task_00 = k_task_t::default();
-    let mut task_name = "test_task".as_mut_ptr();
-    let  mut entry  : k_task_entry_t = Some(test_task_entry);
+    unsafe{
+        let mut test_task_00 = k_task_t::default();
+       
+        let  task_name =   "test_task".as_ptr() as *mut c_char ;
+        let  mut entry  : k_task_entry_t = Some(test_task_entry);
 
-    let mut err  = rust_tos_task_create(&mut test_task_00 as *mut _, task_name , entry, 
-                                                                    arg: *mut ::core::ffi::c_void, 
-                                                                    prio: k_prio_t, 
-                                                                    stk_base: *mut k_stack_t, 
-                                                                    stk_size: c_ulong, 
-                                                                    timeslice: k_timeslice_t)
+
+        let mut err  = rust_tos_task_create(&mut test_task_00 as *mut _, 
+                                            task_name, entry, 
+                                            0 as *mut c_void /*K_NULL*/, 
+                                            9 as k_prio_t /*K_TASK_PRIO_IDLE  9*/, 
+                                            &mut test_task_stack_00[0], 
+                                            512, 
+                                            0);
+        // rust_print_num(err as u32);
+        if(err != K_ERR_TASK_PRIO_INVALID){
+            rust_print("RUST: rust_tos_task_create  test idle failed\r\n".as_ptr());
+            return ;
+        }
+
+        err  = rust_tos_task_create(&mut test_task_00 as *mut _, 
+                                    task_name, entry, 
+                                    0 as *mut c_void /*K_NULL*/, 
+                                    10 as k_prio_t /*K_TASK_PRIO_IDLE+1  10*/, 
+                                    &mut test_task_stack_00[0], 
+                                    512, 
+                                    0);
+        // rust_print_num(err as u32);                  
+        if(err != K_ERR_TASK_PRIO_INVALID){
+            rust_print("RUST: rust_tos_task_create out of prio failed\r\n".as_ptr());
+            return ;
+        }
+
+        err  = rust_tos_task_create(&mut test_task_00 as *mut _, 
+                                    task_name, entry, 
+                                    0 as *mut c_void /*K_NULL*/, 
+                                    3 as k_prio_t /*K_TASK_PRIO_IDLE+1  10*/, 
+                                    &mut test_task_stack_00[0], 
+                                    512, 
+                                    0);
+        // rust_print_num(err as u32);                  
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_task_create create failed\r\n".as_ptr());
+            return ;
+        }
+
+        err = rust_tos_task_destroy(&mut test_task_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_task_destroy  failed\r\n".as_ptr());
+            return ;
+        }
+
+        rust_print("RUST: rust_test_tos_task_create pass\r\n".as_ptr());
+    }
 }
-// TEST test_tos_task_create(void) 
-// {
-//     k_err_t err;
 
-//     err = tos_task_create(&test_task_00, "test_task", test_task_entry,
-//                             K_NULL, K_TASK_PRIO_IDLE,
-//                             test_task_stack_00, sizeof(test_task_stack_00),
-//                             0);
-//     ASSERT_EQ(err, K_ERR_TASK_PRIO_INVALID);
 
-//     err = tos_task_create(&test_task_00, "test_task", test_task_entry,
-//                             K_NULL, K_TASK_PRIO_IDLE + 1,
-//                             test_task_stack_00, sizeof(test_task_stack_00),
-//                             0);
-//     ASSERT_EQ(err, K_ERR_TASK_PRIO_INVALID);
+extern "C" {
+    #[no_mangle]
+    static  mut k_idle_task : k_task_t;
+}
+pub fn rust_test_tos_task_destroy(){
+    unsafe{
+        let mut err = rust_tos_task_destroy(&mut k_idle_task as *mut _);
+        rust_print_num(err as u32);
+        if(err != K_ERR_TASK_DESTROY_IDLE){
+            rust_print("RUST: rust_tos_task_destroy  test idle failed\r\n".as_ptr());
+            return ;
+        }
+        let mut test_task_00 = k_task_t::default();
+       
+        let  task_name =   "test_task".as_ptr() as *mut c_char ;
+        let  mut entry  : k_task_entry_t = Some(test_task_entry);
 
-//     err = tos_task_create(&test_task_00, "test_task", test_task_entry,
-//                             K_NULL, TEST_TASK_PRIO_00,
-//                             test_task_stack_00, sizeof(test_task_stack_00),
-//                             0);
-//     ASSERT_EQ(err, K_ERR_NONE);
+        err  = rust_tos_task_create(&mut test_task_00 as *mut _, 
+            task_name, entry, 
+            0 as *mut c_void /*K_NULL*/, 
+            3 as k_prio_t /*K_TASK_PRIO_IDLE+1  10*/, 
+            &mut test_task_stack_00[0], 
+            512, 
+            0);
+        
+        rust_print_num(err as u32);                  
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_task_create create failed\r\n".as_ptr());
+            return ;
+        }
 
-//     err = tos_task_destroy(&test_task_00);
-//     ASSERT_EQ(err, K_ERR_NONE);
+        err = rust_tos_task_destroy(&mut test_task_00 as *mut _);
+        rust_print_num(err as u32);  
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_task_destroy test_task_00 failed\r\n".as_ptr());
+            return ;
+        }
 
-//     PASS();
-// }
+        rust_print("RUST: rust_test_tos_task_destroy pass\r\n".as_ptr()); 
+    }
+}
+
 
 
 
