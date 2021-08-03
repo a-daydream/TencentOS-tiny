@@ -250,6 +250,91 @@ impl Default for k_char_fifo_st {
 }
 pub type k_chr_fifo_t = k_char_fifo_st;
 
+#[repr(u32)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum pend_state_en {
+    #[doc = "< nothing."]
+    PEND_STATE_NONE = 0,
+    #[doc = "< someone has post, we get what we want."]
+    PEND_STATE_POST = 1,
+    #[doc = "< a post has never came until time is out."]
+    PEND_STATE_TIMEOUT = 2,
+    #[doc = "< someone has destroyed what we are pending for."]
+    PEND_STATE_DESTROY = 3,
+    #[doc = "< the pend object owner task is destroyed."]
+    PEND_STATE_OWNER_DIE = 4,
+}
+pub use self::pend_state_en as pend_state_t;
+pub type k_prio_t = u8;
+pub type k_stack_t = u8;
+pub type k_task_state_t = u8;
+pub type k_task_entry_t =
+    ::core::option::Option<unsafe extern "C" fn(arg: *mut ::core::ffi::c_void)>;
+pub type k_timeslice_t = u32;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct k_task_st {
+    #[doc = "< task stack pointer. This lady always comes first, we count on her in port_s.S for context switch."]
+    pub sp: *mut k_stack_t,
+    #[doc = "< just for verification, test whether current object is really a task."]
+    pub knl_obj: knl_obj_t,
+    #[doc = "< task name"]
+    pub name: [c_char; 16usize],
+    #[doc = "< task entry"]
+    pub entry: k_task_entry_t,
+    #[doc = "< argument for task entry"]
+    pub arg: *mut ::core::ffi::c_void,
+    #[doc = "< just state"]
+    pub state: k_task_state_t,
+    #[doc = "< just priority"]
+    pub prio: k_prio_t,
+    #[doc = "< task stack base address"]
+    pub stk_base: *mut k_stack_t,
+    #[doc = "< stack size of the task"]
+    pub stk_size: c_ulong,
+    #[doc = "< list for hooking us to the k_stat_list"]
+    pub stat_list: k_list_t,
+    #[doc = "< if we are in k_tick_list, how much time will we wait for?"]
+    pub tick_expires: k_tick_t,
+    #[doc = "< list for hooking us to the k_tick_list"]
+    pub tick_list: k_list_t,
+    #[doc = "< when we are ready, our pend_list is in readyqueue; when pend, in a certain pend object's list."]
+    pub pend_list: k_list_t,
+    #[doc = "< the list hold all the mutex we own."]
+    #[doc = "When we die(tos_task_destroy), we have an obligation to wakeup all the task pending for those mutexs we own;"]
+    #[doc = "if not, those pending tasks may never get a chance to wakeup."]
+    pub mutex_own_list: k_list_t,
+    pub prio_pending: k_prio_t,
+    #[doc = "< if we are pending, which pend object's list we are in?"]
+    pub pending_obj: *mut pend_obj_t,
+    #[doc = "< why we wakeup from a pend"]
+    pub pend_state: pend_state_t,
+    #[doc = "< if current time slice is used up, use time_slice_reload to reload our time slice"]
+    pub timeslice_reload: k_timeslice_t,
+    #[doc = "< how much time slice left for us?"]
+    pub timeslice: k_timeslice_t,
+    #[doc = "< if we pend a mail queue successfully, our mail and mail_size will be set by the message queue poster"]
+    pub mail: *mut ::core::ffi::c_void,
+    pub mail_size: c_ulong,
+    #[doc = "< if we are pending an event, what's the option for the pending(TOS_OPT_EVENT_PEND_*)?"]
+    pub opt_event_pend: k_opt_t,
+    #[doc = "< if we are pending an event, what event flag are we pending for ?"]
+    pub flag_expect: k_event_flag_t,
+    #[doc = "< if we pend an event successfully, flag_match will be set by the event poster, and will be returned"]
+    #[doc = "by tos_event_pend to the caller"]
+    pub flag_match: *mut k_event_flag_t,
+}
+impl Default for k_task_st {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+pub type k_task_t = k_task_st;
+pub type k_task_walker_t = ::core::option::Option<unsafe extern "C" fn(task: *mut k_task_t)>;
 
 
 
@@ -262,8 +347,58 @@ extern {
     pub fn rust_osKernelSysTick() ->u32;
 
     //system management
-    // __API__ int tos_knl_is_running(void)
     pub fn rust_tos_knl_is_running() -> i32;
+    pub fn rust_tos_knl_irq_enter();
+    pub fn rust_tos_knl_irq_leave();
+    pub fn rust_tos_knl_sched_lock() -> k_err_t;
+    pub fn rust_tos_knl_sched_unlock() -> k_err_t;
+
+    //tos task
+    pub fn rust_tos_task_create(
+        task: *mut k_task_t,
+        name: *mut c_char,
+        entry: k_task_entry_t,
+        arg: *mut ::core::ffi::c_void,
+        prio: k_prio_t,
+        stk_base: *mut k_stack_t,
+        stk_size: c_ulong,
+        timeslice: k_timeslice_t,
+    ) -> k_err_t;
+
+    pub fn rust_tos_task_destroy(task: *mut k_task_t) -> k_err_t;
+
+    pub fn rust_tos_task_create_dyn(
+        task: *mut *mut k_task_t,
+        name: *mut c_char,
+        entry: k_task_entry_t,
+        arg: *mut ::core::ffi::c_void,
+        prio: k_prio_t,
+        stk_size: c_ulong,
+        timeslice: k_timeslice_t,
+    ) -> k_err_t;
+
+    pub fn rust_tos_task_delay(delay: k_tick_t) -> k_err_t;
+
+    pub fn rust_tos_task_delay_abort(task: *mut k_task_t) -> k_err_t;
+
+    pub fn rust_tos_task_suspend(task: *mut k_task_t) -> k_err_t;
+
+    pub fn rust_tos_task_resume(task: *mut k_task_t) -> k_err_t;
+
+    pub fn rust_tos_task_prio_change(task: *mut k_task_t, prio_new: k_prio_t) -> k_err_t;
+
+    pub fn rust_tos_task_yield();
+
+    pub fn rust_tos_task_curr_task_get() -> *mut k_task_t;
+
+    pub fn rust_tos_task_stack_draught_depth(
+        task: *mut k_task_t,
+        depth: *mut c_int,
+    ) -> k_err_t;
+
+    pub fn rust_tos_task_walkthru(walker: k_task_walker_t);
+
+
 
     // tos_mutex
 
@@ -377,6 +512,7 @@ extern {
 
 
     pub fn rust_print_num(num : u32);
+    pub fn rust_print_i32(num : i32);
 
     pub fn rust_print(msg: *const u8);
 

@@ -174,6 +174,69 @@ void rust_mqtt_daemon()
     }
 }
 
+//tos task
+__API__ k_err_t rust_tos_task_create(k_task_t *task, 
+                                                    char *name, 
+                                                    k_task_entry_t entry, 
+                                                    void *arg, k_prio_t prio, 
+                                                    k_stack_t *stk_base, 
+                                                    long unsigned int stk_size, 
+                                                    k_timeslice_t timeslice)
+{
+    return tos_task_create(task,name,entry,arg,prio,stk_base,stk_size,timeslice);
+}
+
+__API__ k_err_t rust_tos_task_destroy(k_task_t *task){
+    return tos_task_destroy(task);
+}
+
+__API__ k_err_t rust_tos_task_create_dyn(k_task_t **task, 
+                                                    char *name,
+                                                    k_task_entry_t entry,
+                                                    void *arg,
+                                                    k_prio_t prio,
+                                                    long unsigned int  stk_size,
+                                                    k_timeslice_t timeslice)
+{
+    return tos_task_create_dyn(task,name,entry,arg,prio,stk_size,timeslice);
+}
+
+__API__ k_err_t rust_tos_task_delay(k_tick_t delay){
+    return tos_task_delay(delay);
+}
+
+__API__ k_err_t rust_tos_task_delay_abort(k_task_t *task){
+    return tos_task_delay_abort(task);
+}
+
+__API__ k_err_t rust_tos_task_suspend(k_task_t *task){
+    return tos_task_suspend(task);
+}
+
+__API__ k_err_t rust_tos_task_resume(k_task_t *task){
+    return tos_task_resume(task);
+}
+
+__API__ k_err_t rust_tos_task_prio_change(k_task_t *task, k_prio_t prio_new){
+    return tos_task_prio_change(task,prio_new);
+}
+
+__API__ void    rust_tos_task_yield(void){
+    return tos_task_yield();
+}
+
+__API__ k_task_t *rust_tos_task_curr_task_get(void){
+    return tos_task_curr_task_get();
+}
+
+__API__ k_err_t rust_tos_task_stack_draught_depth(k_task_t *task, int *depth){
+    return tos_task_stack_draught_depth(task,depth);
+}
+
+__API__ void rust_tos_task_walkthru(k_task_walker_t walker){
+    return tos_task_walkthru(walker);
+}
+
 //tos_mail
 
 __API__ k_err_t rust_tos_mail_q_create(k_mail_q_t *mail_q, void *pool, size_t mail_cnt, size_t mail_size){
@@ -243,6 +306,7 @@ __API__ k_err_t rust_tos_sem_post_all(k_sem_t *sem){
     return tos_sem_post_all(sem);
 }   
 
+
 //tos_chr_fifo
 k_err_t rust_tos_chr_fifo_create(k_chr_fifo_t *chr_fifo, void *buffer, size_t  size){
     return tos_chr_fifo_create(chr_fifo,buffer,size);
@@ -268,7 +332,7 @@ k_err_t rust_tos_chr_fifo_push(k_chr_fifo_t *chr_fifo, uint8_t data){
     return tos_chr_fifo_push(chr_fifo,data);
 }
 
-int ust_tos_chr_fifo_push_stream(k_chr_fifo_t *chr_fifo, uint8_t *stream, size_t size){
+int rust_tos_chr_fifo_push_stream(k_chr_fifo_t *chr_fifo, uint8_t *stream, size_t size){
     return tos_chr_fifo_push_stream(chr_fifo,stream,size);
 }
 
@@ -298,14 +362,37 @@ int rust_tos_chr_fifo_is_full(k_chr_fifo_t *chr_fifo){
     return tos_chr_fifo_is_full(chr_fifo);
 }
 
+
+
 //CMSIS
 int rust_osKernelRunning(){
     return osKernelRunning();
 }
 
+// uint32_t
+uint32_t rust_osKernelSysTick(){
+    return osKernelSysTick();
+}
+
 //system management
-int rust_tos_knl_is_running(){
+__API__ int rust_tos_knl_is_running(){
     return tos_knl_is_running();
+}
+
+__API__ void    rust_tos_knl_irq_enter(void){
+    return tos_knl_irq_enter();
+}
+
+__API__ void    rust_tos_knl_irq_leave(void){
+    return tos_knl_irq_leave();
+}
+
+__API__ k_err_t rust_tos_knl_sched_lock(void){
+    return tos_knl_sched_lock();
+}
+
+__API__ k_err_t rust_tos_knl_sched_unlock(void){
+    return tos_knl_sched_unlock();
 }
 
 
@@ -323,10 +410,11 @@ void rust_print_num(size_t num){
     printf("this num = %d\n",num);
 }
 
-// uint32_t
-uint32_t rust_osKernelSysTick(){
-    return osKernelSysTick();
+void rust_print_i32(int num){
+    printf("this num = %d\n",num);
 }
+
+
 
 //OLED
 void rust_oled_init(){
