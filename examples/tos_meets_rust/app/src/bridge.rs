@@ -333,6 +333,7 @@ impl Default for k_task_st {
 }
 pub type k_task_t = k_task_st;
 pub type k_task_walker_t = ::core::option::Option<unsafe extern "C" fn(task: *mut k_task_t)>;
+pub type k_time_t = c_uint;
 
 
 
@@ -498,11 +499,19 @@ extern {
     pub fn rust_tos_chr_fifo_is_full(chr_fifo: *mut k_chr_fifo_t) -> i32;
 
 
+    pub fn rust_tos_systick_get() -> k_tick_t;
+    pub fn rust_tos_systick_set(tick: k_tick_t);
+    pub fn rust_tos_tick2millisec(tick: k_tick_t) -> k_time_t;
+    pub fn rust_tos_millisec2tick(millisec: k_time_t) -> k_tick_t;
+    pub fn rust_tos_sleep_ms(millisec: k_time_t) -> k_err_t;
+    pub fn rust_tos_sleep_hmsm(
+        hour: k_time_t,
+        minute: k_time_t,
+        second: k_time_t,
+        millisec: k_time_t,
+    ) -> k_err_t;
 
-
-
-
-
+    
     //OLED
     pub fn rust_oled_print(x : u32, y : u32 ,msg: *const u8);
     pub fn rust_oled_init();

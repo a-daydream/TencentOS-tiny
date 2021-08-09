@@ -53,7 +53,9 @@ pub extern "C" fn application_entry_rust() -> c_void {
 
         // ************************start tos_task_test***************************
         // rust_test_tos_task_create();
-        rust_test_tos_task_destroy();
+        // rust_test_tos_task_destroy();
+        // rust_test_tos_task_delay();
+        rust_test_tos_task_delay_abort();
         //*************************end of tos_task_test**************************
         
         // ************************start tos_chr_fifo_test***********************
@@ -81,17 +83,16 @@ static mut test_task_stack_00 : [k_stack_t;512] = [0;512];
 static mut test_task_stack_01 : [k_stack_t;512] = [0;512];
 static mut test_task_stack_02 : [k_stack_t;512] = [0;512];
 
-// k_stack_t test_task_stack_00[TEST_TASK_STACK_SIZE_00];
-// k_stack_t test_task_stack_01[TEST_TASK_STACK_SIZE_01];
-// k_stack_t test_task_stack_02[TEST_TASK_STACK_SIZE_02];
 
-// k_task_t test_task_00;
-// k_task_t test_task_01;
-// k_task_t test_task_02;
 
-unsafe extern "C" fn  test_task_entry(arg : *mut c_void)
+
+unsafe extern "C" fn  test_task_entry(arg : *mut c_void) 
 {
+    // let count = (*arg) as u32 ;
+    // rust_print_num(count);
     rust_print("test_task_entry\r\n".as_ptr());
+    // rust_tos_task_delay(100);
+    return ;
 }
 
 pub fn rust_test_tos_task_create(){
@@ -194,6 +195,97 @@ pub fn rust_test_tos_task_destroy(){
     }
 }
 
+
+pub fn rust_test_tos_task_delay(){
+    unsafe{
+        // let mut count = 0;
+        let mut begin: k_tick_t = 10;
+        let mut end: k_tick_t = 10;
+        let mut delay: k_tick_t = 2000;
+        let mut deviation: k_tick_t = 10;
+        
+        begin = rust_tos_systick_get();
+        let err = rust_tos_task_delay(delay);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_task_delay failed\r\n".as_ptr());
+            return ;
+        }
+        end = rust_tos_systick_get();
+        rust_print_num(begin);
+        rust_print_num(end);
+//     int try = 0;
+//     k_err_t err;
+//     k_tick_t begin, end, delay, deviation = (k_tick_t)10u;
+
+//     while (try++ < 5) {
+//         delay = try * 300 + 200;
+
+//         begin = tos_systick_get();
+//         err = tos_task_delay(delay);
+//         ASSERT_EQ(err, K_ERR_NONE);
+//         end = tos_systick_get();
+//         ASSERT(end - begin <= delay + deviation);
+//     }
+        rust_print("RUST: rust_test_tos_task_delay pass\r\n".as_ptr());
+    }
+}
+
+pub fn rust_test_tos_task_delay_abort(){
+    unsafe{
+        let mut delay: k_tick_t = u32::MAX - 1;
+        // delay_abort_count = 0;
+        let mut test_task_00 = k_task_t::default();
+       
+        let  task_name =   "test_task".as_ptr() as *mut c_char ;
+        let  mut entry  : k_task_entry_t = Some(test_task_entry);
+       
+        
+
+        let mut err  = rust_tos_task_create(&mut test_task_00 as *mut _, 
+                                                task_name, entry, 
+                                                delay as *mut c_void , 
+                                                3 as k_prio_t /*K_TASK_PRIO_IDLE  9*/, 
+                                                &mut test_task_stack_00[0], 
+                                                512, 
+                                                0);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_task_create  test delay abort failed\r\n".as_ptr());
+            return ;
+        }
+
+        
+        // if(delay_abort_count != 0){
+        //     rust_print("RUST: delay_abort_count set 0 failed\r\n".as_ptr());
+        //     return ;
+        // }
+
+        err = rust_tos_task_delay(100);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_task_delay 100 failed\r\n".as_ptr());
+            return ;
+        }
+        // rust_print_num(count);
+        // if(delay_abort_count != 0){
+        //     rust_print("RUST: rust_tos_task_delay abort failed\r\n".as_ptr());
+        //     return ;   
+        // }
+
+        // err = rust_tos_task_delay_abort(&mut test_task_00 as *mut _);
+        // rust_tos_task_delay(100);
+
+        // if(delay_abort_count != 1){
+        //     rust_print("RUST: rust_tos_task_delay abort count + 1 failed\r\n".as_ptr());
+        //     return ; 
+        // }
+
+        // err = rust_tos_task_destroy(&mut test_task_00 as *mut _);
+        // if(err != K_ERR_NONE){
+        //     rust_print("RUST: rust_tos_task_destroy failed\r\n".as_ptr());
+        //     return ;
+        // }
+        rust_print("RUST: rust_test_tos_task_delay_abort pass\r\n".as_ptr());
+    }
+}
 
 
 

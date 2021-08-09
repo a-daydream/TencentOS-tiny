@@ -395,6 +395,31 @@ __API__ k_err_t rust_tos_knl_sched_unlock(void){
     return tos_knl_sched_unlock();
 }
 
+//start of time management
+__API__ k_tick_t    rust_tos_systick_get(void){
+    return tos_systick_get();
+}
+
+__API__ void        rust_tos_systick_set(k_tick_t tick){
+    return tos_systick_set(tick);
+}
+
+__API__ k_time_t    rust_tos_tick2millisec(k_tick_t tick){
+    return tos_tick2millisec(tick);
+}
+
+__API__ k_tick_t    rust_tos_millisec2tick(k_time_t millisec){
+    return tos_millisec2tick(millisec);
+}
+
+__API__ k_err_t     rust_tos_sleep_ms(k_time_t millisec){
+    return tos_sleep_ms(millisec);
+}
+
+__API__ k_err_t     rust_tos_sleep_hmsm(k_time_t hour, k_time_t minute, k_time_t second, k_time_t millisec){
+    return tos_sleep_hmsm(hour,minute,second,millisec);
+}
+//end
 
 
 void rust_print(const char *msg) {
