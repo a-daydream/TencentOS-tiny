@@ -335,6 +335,35 @@ pub type k_task_t = k_task_st;
 pub type k_task_walker_t = ::core::option::Option<unsafe extern "C" fn(task: *mut k_task_t)>;
 pub type k_time_t = c_uint;
 
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct k_mmheap_information_st {
+    pub used: c_uint,
+    pub free: c_uint,
+}
+pub type k_mmheap_info_t = k_mmheap_information_st;
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct k_mmblk_pool_st {
+    pub knl_obj: knl_obj_t,
+    pub pool_start: *mut ::core::ffi::c_void,
+    pub free_list: *mut ::core::ffi::c_void,
+    pub blk_size: c_ulong,
+    pub blk_max: c_ulong,
+    pub blk_free: c_ulong,
+}
+
+impl Default for k_mmblk_pool_st {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+pub type k_mmblk_pool_t = k_mmblk_pool_st;
 
 
 /// These glue functions are from tosglue.c
@@ -396,8 +425,56 @@ extern {
     ) -> k_err_t;
 
     pub fn rust_tos_task_walkthru(walker: k_task_walker_t);
+  //end of task
 
+  //tos mmheap
+    pub fn rust_tos_mmheap_pool_add(
+        pool_start: *mut c_void,
+        pool_size: c_ulong,
+    ) -> k_err_t;
 
+    pub fn rust_tos_mmheap_pool_rmv(pool_start: *mut c_void) -> k_err_t;
+
+    pub fn rust_tos_mmheap_alloc(size: c_ulong) -> *mut c_void;
+
+    pub fn rust_tos_mmheap_aligned_alloc(
+        size: c_ulong,
+        align: c_ulong,
+    ) -> *mut c_void;
+
+    pub fn rust_tos_mmheap_realloc(
+        ptr: *mut c_void,
+        size: c_ulong,
+    ) -> *mut c_void;
+
+    pub fn rust_tos_mmheap_free(ptr: *mut c_void);
+
+    pub fn rust_tos_mmheap_pool_check(
+        pool_start: *mut c_void,
+        info: *mut k_mmheap_info_t,
+    ) -> k_err_t;
+
+    pub fn rust_tos_mmheap_check(info: *mut k_mmheap_info_t) -> k_err_t;
+    //end of mmheap 
+
+    //start of tos mmblk
+
+    pub fn rust_tos_mmblk_pool_create(
+        mbp: *mut k_mmblk_pool_t,
+        pool_start: *mut ::core::ffi::c_void,
+        blk_num: c_ulong,
+        blk_size: c_ulong,
+    ) -> k_err_t;
+
+    pub fn rust_tos_mmblk_pool_destroy(mbp: *mut k_mmblk_pool_t) -> k_err_t;
+
+    pub fn rust_tos_mmblk_alloc(mbp: *mut k_mmblk_pool_t, blk: *mut *mut ::core::ffi::c_void)
+        -> k_err_t;
+
+    pub fn rust_tos_mmblk_free(mbp: *mut k_mmblk_pool_t, blk: *mut ::core::ffi::c_void) -> k_err_t;
+
+    
+    //end of tos mmblk
 
     // tos_mutex
 

@@ -236,6 +236,60 @@ __API__ k_err_t rust_tos_task_stack_draught_depth(k_task_t *task, int *depth){
 __API__ void rust_tos_task_walkthru(k_task_walker_t walker){
     return tos_task_walkthru(walker);
 }
+//end of task 
+
+// tos mmheap
+__API__ k_err_t rust_tos_mmheap_pool_add(void *pool_start, long unsigned int  pool_size){
+    return tos_mmheap_pool_add(pool_start,pool_size);
+}
+
+__API__ k_err_t rust_tos_mmheap_pool_rmv(void *pool_start){
+    return tos_mmheap_pool_rmv(pool_start);
+}
+
+__API__ void   *rust_tos_mmheap_alloc(long unsigned int  size){
+    return tos_mmheap_alloc(size);
+}
+
+__API__ void   *rust_tos_mmheap_aligned_alloc(long unsigned int  size, long unsigned int  align){
+    return tos_mmheap_aligned_alloc(size,align);
+}
+
+__API__ void   *rust_tos_mmheap_realloc(void *ptr, long unsigned int  size){
+    return tos_mmheap_realloc(ptr,size);
+}
+
+__API__ void    rust_tos_mmheap_free(void *ptr){
+    return tos_mmheap_free(ptr);
+}
+
+__API__ k_err_t rust_tos_mmheap_pool_check(void *pool_start, k_mmheap_info_t *info){
+    return tos_mmheap_pool_check(pool_start,info);
+}
+
+__API__ k_err_t rust_tos_mmheap_check(k_mmheap_info_t *info){
+    return tos_mmheap_check(info);
+}
+// end of mmheap
+
+// tos mmblk
+__API__ k_err_t rust_tos_mmblk_pool_create(k_mmblk_pool_t *mbp, void *pool_start, long unsigned int blk_num, long unsigned int blk_size){
+    return tos_mmblk_pool_create(mbp,pool_start,blk_num,blk_size);
+}
+
+__API__ k_err_t rust_tos_mmblk_pool_destroy(k_mmblk_pool_t *mbp){
+    return tos_mmblk_pool_destroy(mbp);
+}
+
+__API__ k_err_t rust_tos_mmblk_alloc(k_mmblk_pool_t *mbp, void **blk){
+    return tos_mmblk_alloc(mbp,blk);
+}
+
+__API__ k_err_t rust_tos_mmblk_free(k_mmblk_pool_t *mbp, void *blk){
+    return tos_mmblk_free(mbp,blk);
+}
+// end of tos mmblk
+
 
 //tos_mail
 

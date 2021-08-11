@@ -58,8 +58,21 @@ pub extern "C" fn application_entry_rust() -> c_void {
         // rust_test_tos_task_delay_abort();
         // rust_test_tos_task_suspend_resume();
         // rust_test_tos_task_prio_change();
-        rust_test_tos_task_yeild();
+        // rust_test_tos_task_yeild();
         //*************************end of tos_task_test**************************
+        
+        //to test
+        // ************************start tos mmheap***************************
+        // to do
+        //*************************end of tos mmheap**************************
+        
+        // ************************start tos mmheap***************************
+        // rust_test_tos_mmblk_pool_create();
+        // rust_test_tos_mmblk_pool_destroy();
+
+        //*************************end of tos mmheap**************************
+        
+        //end
         
         // ************************start tos_chr_fifo_test***********************
         // rust_test_tos_fifo_create();
@@ -157,7 +170,6 @@ pub fn rust_test_tos_task_create(){
     }
 }
 
-
 extern "C" {
     #[no_mangle]
     static  mut k_idle_task : k_task_t;
@@ -202,6 +214,7 @@ pub fn rust_test_tos_task_destroy(){
 
 
 pub fn rust_test_tos_task_delay(){
+
     unsafe{
         // let mut count = 0;
         let mut begin: k_tick_t = 10;
@@ -218,19 +231,6 @@ pub fn rust_test_tos_task_delay(){
         end = rust_tos_systick_get();
         rust_print_num(begin);
         rust_print_num(end);
-//     int try = 0;
-//     k_err_t err;
-//     k_tick_t begin, end, delay, deviation = (k_tick_t)10u;
-
-//     while (try++ < 5) {
-//         delay = try * 300 + 200;
-
-//         begin = tos_systick_get();
-//         err = tos_task_delay(delay);
-//         ASSERT_EQ(err, K_ERR_NONE);
-//         end = tos_systick_get();
-//         ASSERT(end - begin <= delay + deviation);
-//     }
         rust_print("RUST: rust_test_tos_task_delay pass\r\n".as_ptr());
     }
 }
@@ -422,7 +422,135 @@ pub fn rust_test_tos_task_yeild(){
     }
 }
 
+//***************************end of tos_task test*****************************
 
+//***************************start tos mmheap test*****************************
+pub fn rust_test_tos_mmheap(){
+    //to do
+}
+
+//***************************end of  tos mmheap test***************************
+
+//***************************start tos mmblk test******************************
+static mut mmblk_pool_buffer_00 : [u8; (5*0x20)] = [0;(5*0x20)];
+static mut mmblk_pool_buffer_01 : [u8; (5*0x20)] = [0;(5*0x20)];
+static mut mmblk_pool_buffer_02 : [u8; (5*0x20)] = [0;(5*0x20)];
+
+pub fn rust_test_tos_mmblk_pool_create(){
+    unsafe{
+        let mut test_mmblk_pool_00 = k_mmblk_pool_t::default() ;
+        let mut test_mmblk_pool_01 = k_mmblk_pool_t::default() ;
+        let mut test_mmblk_pool_02 = k_mmblk_pool_t::default() ;
+
+        let mut err = rust_tos_mmblk_pool_create(&mut test_mmblk_pool_00 as *mut _, &mut mmblk_pool_buffer_00 as *mut _ as *mut c_void, 5, 32);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mmblk_pool_create failed\r\n".as_ptr());
+            return ;
+        }
+
+        err = rust_tos_mmblk_pool_create(&mut test_mmblk_pool_01 as *mut _, &mut mmblk_pool_buffer_01 as *mut _ as *mut c_void, 5, 32);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mmblk_pool_create failed\r\n".as_ptr());
+            return ;
+        }
+
+        err = rust_tos_mmblk_pool_create(&mut test_mmblk_pool_02 as *mut _, &mut mmblk_pool_buffer_02 as *mut _ as *mut c_void, 5, 32);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mmblk_pool_create failed\r\n".as_ptr());
+            return ;
+        }
+
+        err = rust_tos_mmblk_pool_destroy(&mut test_mmblk_pool_00);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mmblk_pool_destroy failed\r\n".as_ptr());
+            return ;
+        }
+
+        err = rust_tos_mmblk_pool_destroy(&mut test_mmblk_pool_01);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mmblk_pool_destroy failed\r\n".as_ptr());
+            return ;
+        }
+
+        err = rust_tos_mmblk_pool_destroy(&mut test_mmblk_pool_02);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mmblk_pool_destroy failed\r\n".as_ptr());
+            return ;
+        }
+
+        err = rust_tos_mmblk_pool_create(&mut test_mmblk_pool_00 as *mut _, 0 as *mut c_void, 5, 32);
+        if(err != K_ERR_OBJ_PTR_NULL){
+            rust_print("RUST: rust_tos_mmblk_pool_create 0 failed\r\n".as_ptr());
+            return ;
+        }
+
+
+        // err = rust_tos_mmblk_pool_create(&mut test_mmblk_pool_00 as *mut _, ( (mmblk_pool_buffer_01[0] as u32 ) + 1) as *mut c_void, 5, 32);
+        // if(err != K_ERR_MMBLK_INVALID_POOL_ADDR){
+        //     rust_print("RUST: rust_tos_mmblk_pool_create invalid failed\r\n".as_ptr());
+        //     return ;
+        // }
+
+        err = rust_tos_mmblk_pool_create(&mut test_mmblk_pool_01 as *mut _, &mut mmblk_pool_buffer_01 as *mut _ as *mut c_void, 5, 33);
+        if(err != K_ERR_MMBLK_INVALID_BLK_SIZE){
+            rust_print("RUST: rust_tos_mmblk_pool_create size failed\r\n".as_ptr());
+            return ;
+        }
+
+        rust_print("RUST: rust_test_tos_mmblk_pool_create pass\r\n".as_ptr());
+    }
+
+}
+
+pub fn rust_test_tos_mmblk_pool_destroy(){
+    let mut test_mmblk_pool_00 = k_mmblk_pool_t::default();
+    unsafe{
+        let mut err = rust_tos_mmblk_pool_destroy(&mut test_mmblk_pool_00 as *mut _);
+        if (  err != K_ERR_OBJ_INVALID ) {
+            rust_print("RUST: rust_tos_mmblk_pool_destroy  failed\r\n".as_ptr());
+            return ;
+        }
+        rust_print("RUST: rust_test_tos_mmblk_pool_destroy pass\r\n".as_ptr());
+    }
+}
+
+pub fn rust_test_tos_mmblk_alloc(){
+    unsafe{
+        let mut test_mmblk_pool_00 = k_mmblk_pool_t::default();
+        let mut err = rust_tos_mmblk_pool_create(&mut test_mmblk_pool_00 as *mut _, &mut mmblk_pool_buffer_00 as *mut _ as *mut c_void, 5, 32);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mmblk_pool_create failed\r\n".as_ptr());
+            return ;
+        }
+
+        for i in 1..6  {
+            err = rust_tos_mmblk_alloc(&mut test_mmblk_pool_00 as *mut _, 0 as *mut c_void);
+            if(err != K_ERR_NONE){
+                rust_print("RUST: rust_tos_mmblk_alloc failed\r\n".as_ptr());
+                return ;
+            }
+            if(blk == 0){
+
+            }
+            
+        }
+        err = rust_tos_mmblk_alloc(&mut test_mmblk_pool_00 as *mut _, 0 as *mut c_void);
+        if(err != K_ERR_MMBLK_POOL_EMPTY){
+            rust_print("RUST: rust_tos_mmblk_alloc empty\r\n".as_ptr());
+            return ;
+        }
+
+        err =rust_tos_mmblk_pool_destroy(&mut test_mmblk_pool_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mmblk_pool_destroy failed\r\n".as_ptr());
+            return ;
+        }
+        rust_print("RUST: rust_test_tos_mmblk_alloc pass\r\n".as_ptr());
+    }
+}
+
+
+//***************************end of  tos mmblk test****************************
 
 //****************************tos_chr_fifo test************************
 pub fn  rust_test_tos_fifo_create() {
@@ -477,6 +605,8 @@ pub fn  rust_test_tos_fifo_create() {
         rust_print("RUST: rust_test_tos_fifo_create pass\r\n".as_ptr());
     }
 }
+
+
 
 pub fn rust_test_tos_fifo_destory(){
     let mut test_fifo_00 = k_chr_fifo_t::default();
