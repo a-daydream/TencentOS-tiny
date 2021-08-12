@@ -365,6 +365,47 @@ impl Default for k_mmblk_pool_st {
 }
 pub type k_mmblk_pool_t = k_mmblk_pool_st;
 
+pub type k_nesting_t = c_uchar;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct k_mutex_st {
+    pub knl_obj: knl_obj_t,
+    pub pend_obj: pend_obj_t,
+    pub pend_nesting: k_nesting_t,
+    pub owner: *mut k_task_t,
+    pub owner_orig_prio: k_prio_t,
+    pub owner_anchor: k_list_t,
+}
+impl Default for k_mutex_st {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+pub type k_mutex_t = k_mutex_st;
+
+
+pub type completion_done_t = c_ushort;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct k_completion_st {
+    pub knl_obj: knl_obj_t,
+    pub pend_obj: pend_obj_t,
+    pub done: completion_done_t,
+}
+impl Default for k_completion_st {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+pub type k_completion_t = k_completion_st;
 
 /// These glue functions are from tosglue.c
 extern {
@@ -374,14 +415,16 @@ extern {
     pub fn rust_osKernelRunning() -> i32;
     pub fn rust_osKernelSysTick() ->u32;
 
-    //system management
+//************************system management************************
     pub fn rust_tos_knl_is_running() -> i32;
     pub fn rust_tos_knl_irq_enter();
     pub fn rust_tos_knl_irq_leave();
     pub fn rust_tos_knl_sched_lock() -> k_err_t;
     pub fn rust_tos_knl_sched_unlock() -> k_err_t;
+//************************system management************************
 
-    //tos task
+
+//************************tos task**************************************
     pub fn rust_tos_task_create(
         task: *mut k_task_t,
         name: *mut c_char,
@@ -425,9 +468,11 @@ extern {
     ) -> k_err_t;
 
     pub fn rust_tos_task_walkthru(walker: k_task_walker_t);
-  //end of task
+//************************tos task**************************************
 
-  //tos mmheap
+
+
+//************************tos mmheap************************
     pub fn rust_tos_mmheap_pool_add(
         pool_start: *mut c_void,
         pool_size: c_ulong,
@@ -455,9 +500,9 @@ extern {
     ) -> k_err_t;
 
     pub fn rust_tos_mmheap_check(info: *mut k_mmheap_info_t) -> k_err_t;
-    //end of mmheap 
+//************************tos mmheap************************
 
-    //start of tos mmblk
+//************************start of tos mmblk************************
 
     pub fn rust_tos_mmblk_pool_create(
         mbp: *mut k_mmblk_pool_t,
@@ -474,10 +519,25 @@ extern {
     pub fn rust_tos_mmblk_free(mbp: *mut k_mmblk_pool_t, blk: *mut ::core::ffi::c_void) -> k_err_t;
 
     
-    //end of tos mmblk
+//************************start of tos mmblk************************
 
-    // tos_mutex
 
+
+//***************************  tos_mutex ****************************************
+    pub fn rust_tos_mutex_create(mutex: *mut k_mutex_t) -> k_err_t;
+
+    pub fn rust_tos_mutex_create_dyn(mutex: *mut *mut k_mutex_t) -> k_err_t;
+
+    pub fn rust_tos_mutex_destroy(mutex: *mut k_mutex_t) -> k_err_t;
+
+    pub fn rust_tos_mutex_pend_timed(mutex: *mut k_mutex_t, timeout: k_tick_t) -> k_err_t;
+
+    pub fn rust_tos_mutex_pend(mutex: *mut k_mutex_t) -> k_err_t;
+
+    pub fn rust_tos_mutex_post(mutex: *mut k_mutex_t) -> k_err_t;
+
+    pub fn rust_mutex_release(mutex: *mut k_mutex_t);
+//***************************  tos_mutex ****************************************
 
     //tos_mail
     pub fn rust_tos_mail_q_create(
@@ -588,7 +648,26 @@ extern {
         millisec: k_time_t,
     ) -> k_err_t;
 
-    
+
+//********************************tos completion************************************ 
+pub fn rust_tos_completion_create(completion: *mut k_completion_t) -> k_err_t;
+
+pub fn rust_tos_completion_destroy(completion: *mut k_completion_t) -> k_err_t;
+
+pub fn rust_tos_completion_pend_timed(completion: *mut k_completion_t, timeout: k_tick_t)
+    -> k_err_t;
+
+pub fn rust_tos_completion_pend(completion: *mut k_completion_t) -> k_err_t;
+
+pub fn rust_tos_completion_post(completion: *mut k_completion_t) -> k_err_t;
+
+pub fn rust_tos_completion_post_all(completion: *mut k_completion_t) -> k_err_t;
+
+pub fn rust_tos_completion_reset(completion: *mut k_completion_t) -> k_err_t;
+
+pub fn rust_tos_completion_is_done(completion: *mut k_completion_t) -> c_int;
+//********************************tos completion************************************ 
+
     //OLED
     pub fn rust_oled_print(x : u32, y : u32 ,msg: *const u8);
     pub fn rust_oled_init();

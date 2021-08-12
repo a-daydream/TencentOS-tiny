@@ -291,6 +291,71 @@ __API__ k_err_t rust_tos_mmblk_free(k_mmblk_pool_t *mbp, void *blk){
 // end of tos mmblk
 
 
+//**********************************tos mutex ****************************************
+__API__ k_err_t rust_tos_mutex_create(k_mutex_t *mutex){
+    return tos_mutex_create(mutex);
+}
+
+__API__ k_err_t rust_tos_mutex_create_dyn(k_mutex_t **mutex){
+    return tos_mutex_create_dyn(mutex);
+}
+
+__API__ k_err_t rust_tos_mutex_destroy(k_mutex_t *mutex){
+    return tos_mutex_destroy(mutex);
+}
+
+__API__ k_err_t rust_tos_mutex_pend_timed(k_mutex_t *mutex, k_tick_t timeout){
+    return tos_mutex_pend_timed(mutex,timeout);
+}
+
+__API__ k_err_t rust_tos_mutex_pend(k_mutex_t *mutex){
+    return tos_mutex_pend(mutex);
+}
+
+__API__ k_err_t rust_tos_mutex_post(k_mutex_t *mutex){
+    return tos_mutex_post(mutex);
+}
+
+__KNL__ void rust_mutex_release(k_mutex_t *mutex){
+    return mutex_release(mutex);
+}
+//**********************************tos mutex ****************************************
+
+#if TOS_CFG_COMPLETION_EN > 0
+//**********************************tos completion ****************************************
+__API__ k_err_t rust_tos_completion_create(k_completion_t *completion){
+    return tos_completion_create(completion);
+}
+
+__API__ k_err_t rust_tos_completion_destroy(k_completion_t *completion){
+    return tos_completion_destroy(completion);
+}
+
+__API__ k_err_t rust_tos_completion_pend_timed(k_completion_t *completion, k_tick_t timeout){
+    return tos_completion_pend_timed(completion,timeout);
+}
+
+__API__ k_err_t rust_tos_completion_pend(k_completion_t *completion){
+    return tos_completion_pend(completion);
+}
+
+__API__ k_err_t rust_tos_completion_post(k_completion_t *completion){
+    return  tos_completion_post(completion);
+}
+
+__API__ k_err_t rust_tos_completion_post_all(k_completion_t *completion){
+    return tos_completion_post_all(completion);
+}
+
+__API__ k_err_t rust_tos_completion_reset(k_completion_t *completion){
+    return tos_completion_reset(completion);
+}
+
+__API__ int rust_tos_completion_is_done(k_completion_t *completion){
+    return tos_completion_is_done(completion);
+}
+//**********************************tos completion ****************************************
+#endif
 //tos_mail
 
 __API__ k_err_t rust_tos_mail_q_create(k_mail_q_t *mail_q, void *pool, size_t mail_cnt, size_t mail_size){

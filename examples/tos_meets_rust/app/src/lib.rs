@@ -66,13 +66,16 @@ pub extern "C" fn application_entry_rust() -> c_void {
         // to do
         //*************************end of tos mmheap**************************
         
-        // ************************start tos mmheap***************************
+        // ************************start tos mmblk***************************
         // rust_test_tos_mmblk_pool_create();
         // rust_test_tos_mmblk_pool_destroy();
         // rust_test_tos_mmblk_alloc();
-        rust_test_tos_mmblk_free();
-        //*************************end of tos mmheap**************************
+        // rust_test_tos_mmblk_free();
+        //*************************end of tos mmblk**************************
         
+
+
+
         //end
         
         // ************************start tos_chr_fifo_test***********************
@@ -425,6 +428,7 @@ pub fn rust_test_tos_task_yeild(){
 
 //***************************end of tos_task test*****************************
 
+
 //***************************start tos mmheap test*****************************
 pub fn rust_test_tos_mmheap(){
     //to do
@@ -595,6 +599,15 @@ pub fn rust_test_tos_mmblk_free(){
 }
 
 //***************************end of  tos mmblk test****************************
+
+//****************************tos mutex test********************************
+//to do
+//****************************end  of tos mutex test************************
+
+//****************************tos completion test********************************
+//to do
+//****************************end  of tos completion test************************
+
 
 //****************************tos_chr_fifo test************************
 pub fn  rust_test_tos_fifo_create() {
@@ -852,3 +865,5 @@ pub fn rust_test_tos_fifo_stream_push(){
         rust_print("rust_test_tos_fifo_stream_push pass\r\n".as_ptr());
     }
 }
+
+//****************************end of tos_chr_fifo test************************
