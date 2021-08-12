@@ -69,7 +69,8 @@ pub extern "C" fn application_entry_rust() -> c_void {
         // ************************start tos mmheap***************************
         // rust_test_tos_mmblk_pool_create();
         // rust_test_tos_mmblk_pool_destroy();
-
+        // rust_test_tos_mmblk_alloc();
+        rust_test_tos_mmblk_free();
         //*************************end of tos mmheap**************************
         
         //end
@@ -506,7 +507,7 @@ pub fn rust_test_tos_mmblk_pool_destroy(){
     let mut test_mmblk_pool_00 = k_mmblk_pool_t::default();
     unsafe{
         let mut err = rust_tos_mmblk_pool_destroy(&mut test_mmblk_pool_00 as *mut _);
-        if (  err != K_ERR_OBJ_INVALID ) {
+        if (  err != K_ERR_OBJ_INVALID_ALLOC_TYPE ) {
             rust_print("RUST: rust_tos_mmblk_pool_destroy  failed\r\n".as_ptr());
             return ;
         }
@@ -522,19 +523,21 @@ pub fn rust_test_tos_mmblk_alloc(){
             rust_print("RUST: rust_tos_mmblk_pool_create failed\r\n".as_ptr());
             return ;
         }
-
+        let mut blk = test_mmblk_pool_00.free_list;
+        let pblk = &mut blk as *mut *mut c_void;
         for i in 1..6  {
-            err = rust_tos_mmblk_alloc(&mut test_mmblk_pool_00 as *mut _, 0 as *mut c_void);
+            err = rust_tos_mmblk_alloc(&mut test_mmblk_pool_00 as *mut _, pblk);
             if(err != K_ERR_NONE){
                 rust_print("RUST: rust_tos_mmblk_alloc failed\r\n".as_ptr());
                 return ;
             }
-            if(blk == 0){
-
+            if(pblk == (0 as * mut  *mut c_void)){
+                rust_print("RUST: blk ==null failed\r\n".as_ptr());
+                return ;
             }
             
         }
-        err = rust_tos_mmblk_alloc(&mut test_mmblk_pool_00 as *mut _, 0 as *mut c_void);
+        err = rust_tos_mmblk_alloc(&mut test_mmblk_pool_00 as *mut _, 0 as * mut  *mut c_void);
         if(err != K_ERR_MMBLK_POOL_EMPTY){
             rust_print("RUST: rust_tos_mmblk_alloc empty\r\n".as_ptr());
             return ;
@@ -549,6 +552,47 @@ pub fn rust_test_tos_mmblk_alloc(){
     }
 }
 
+pub fn rust_test_tos_mmblk_free(){
+    unsafe{
+        let mut test_mmblk_pool_00 = k_mmblk_pool_t::default();
+        let mut err = rust_tos_mmblk_pool_create(&mut test_mmblk_pool_00 as *mut _,&mut  mmblk_pool_buffer_00 as *mut _ as *mut c_void, 5, 32);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mmblk_pool_create failed\r\n".as_ptr());
+            return ;
+        }
+
+        let mut blk = test_mmblk_pool_00.free_list;
+        let pblk = &mut blk as *mut *mut c_void;
+        err = rust_tos_mmblk_alloc(&mut test_mmblk_pool_00 as *mut _, pblk);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mmblk_alloc failed\r\n".as_ptr());
+            return ;
+        }
+        if(pblk == (0 as * mut  *mut c_void)){
+            rust_print("RUST: blk ==null failed\r\n".as_ptr());
+            return ;
+        }
+
+        err = rust_tos_mmblk_free(&mut test_mmblk_pool_00 as *mut _, blk);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mmblk_alloc failed\r\n".as_ptr());
+            return ;
+        }
+
+        err = rust_tos_mmblk_free(&mut test_mmblk_pool_00 as *mut _, blk);
+        if(err != K_ERR_MMBLK_POOL_FULL){
+            rust_print("RUST: rust_tos_mmblk_alloc free failed\r\n".as_ptr());
+            return ;
+        }
+
+        err =rust_tos_mmblk_pool_destroy(&mut test_mmblk_pool_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mmblk_pool_destroy failed\r\n".as_ptr());
+            return ;
+        }
+        rust_print("RUST: rust_test_tos_mmblk_free pass\r\n".as_ptr());
+    }
+}
 
 //***************************end of  tos mmblk test****************************
 
