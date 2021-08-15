@@ -10,6 +10,7 @@
 #include "ch20_parser.h"
 #include "oled.h"
 #include "user_config.h"
+#include "cmsis_os.h"
 
 #include "tos_at.h"
 
@@ -356,19 +357,500 @@ __API__ int rust_tos_completion_is_done(k_completion_t *completion){
 }
 //**********************************tos completion ****************************************
 #endif
-//tos_mail
 
+#if TOS_CFG_COUNTDOWNLATCH_EN > 0
+//**********************************tos countdownlatch ****************************************
+__API__ k_err_t rust_tos_countdownlatch_create(k_countdownlatch_t *countdownlatch, k_countdownlatch_cnt_t count){
+    return tos_countdownlatch_create(countdownlatch,count);
+}
+
+__API__ k_err_t rust_tos_countdownlatch_destroy(k_countdownlatch_t *countdownlatch){
+    return tos_countdownlatch_destroy(countdownlatch);
+}
+
+__API__ k_err_t rust_tos_countdownlatch_pend_timed(k_countdownlatch_t *countdownlatch, k_tick_t timeout){
+    return tos_countdownlatch_pend_timed(countdownlatch,timeout);
+}
+
+__API__ k_err_t rust_tos_countdownlatch_pend(k_countdownlatch_t *countdownlatch){
+    return tos_countdownlatch_pend(countdownlatch);
+}
+
+__API__ k_err_t rust_tos_countdownlatch_post(k_countdownlatch_t *countdownlatch){
+    return tos_countdownlatch_post(countdownlatch);
+}
+
+__API__ k_err_t rust_tos_countdownlatch_reset(k_countdownlatch_t *countdownlatch, k_countdownlatch_cnt_t count){
+    return rust_tos_countdownlatch_reset(countdownlatch,count);
+}
+//**********************************tos countdownlatch ****************************************
+#endif
+
+#if TOS_CFG_BARRIER_EN > 0
+//**********************************tos barrier ****************************************
+__API__ k_err_t rust_tos_barrier_create(k_barrier_t *barrier, k_barrier_cnt_t count){
+    return tos_barrier_create(barrier, count);
+}
+
+__API__ k_err_t rust_tos_barrier_destroy(k_barrier_t *barrier){
+    return tos_barrier_destroy(barrier);
+}
+
+__API__ k_err_t rust_tos_barrier_pend(k_barrier_t *barrier){
+    return tos_barrier_pend(barrier);
+}
+
+__API__ k_err_t rust_tos_barrier_reset(k_barrier_t *barrier, k_barrier_cnt_t count){
+    return tos_barrier_reset(barrier, count);
+}
+
+//**********************************tos barrier ****************************************
+#endif
+
+#if (TOS_CFG_SEM_EN > 0u) && (TOS_CFG_MUTEX_EN > 0u)
+//**********************************tos rwlock ****************************************
+__API__ k_err_t rust_tos_rwlock_create(k_rwlock_t *rwlock){
+    return tos_rwlock_create(rwlock);
+}
+
+__API__ k_err_t rust_tos_rwlock_destroy(k_rwlock_t *rwlock){
+    return tos_rwlock_destroy(rwlock);
+}
+
+__API__ k_err_t rust_tos_rwlock_rpend_timed(k_rwlock_t *rwlock, k_tick_t timeout){
+    return tos_rwlock_rpend_timed(rwlock,timeout);
+}
+
+__API__ k_err_t rust_tos_rwlock_rpend(k_rwlock_t *rwlock){
+    return tos_rwlock_rpend(rwlock);
+}
+
+__API__ k_err_t rust_tos_rwlock_rpend_try(k_rwlock_t *rwlock){
+    return tos_rwlock_rpend_try(rwlock);
+}
+
+__API__ k_err_t rust_tos_rwlock_wpend_timed(k_rwlock_t *rwlock, k_tick_t timeout){
+    return tos_rwlock_wpend_timed(rwlock,timeout);
+}
+
+__API__ k_err_t rust_tos_rwlock_wpend(k_rwlock_t *rwlock){
+    return tos_rwlock_wpend(rwlock);
+}
+
+__API__ k_err_t rust_tos_rwlock_wpend_try(k_rwlock_t *rwlock){
+    return tos_rwlock_wpend_try(rwlock);
+}
+
+__API__ k_err_t rust_tos_rwlock_rpost(k_rwlock_t *rwlock){
+    return tos_rwlock_rpost(rwlock);
+}
+
+__API__ k_err_t rust_tos_rwlock_wpost(k_rwlock_t *rwlock){
+    return tos_rwlock_wpost(rwlock);
+}
+
+__API__ k_err_t rust_tos_rwlock_post(k_rwlock_t *rwlock){
+    return tos_rwlock_post(rwlock);
+}
+//**********************************tos rwlock ****************************************
+#endif
+
+#if TOS_CFG_MESSAGE_QUEUE_EN > 0u
+//**********************************tos msg_q ****************************************
+__API__ k_err_t rust_tos_msg_q_create(k_msg_q_t *msg_q, void *pool, unsigned long int msg_cnt){
+    return tos_msg_q_create(msg_q,pool,msg_cnt);
+}
+
+__API__ k_err_t rust_tos_msg_q_destroy(k_msg_q_t *msg_q){
+    return tos_msg_q_destroy(msg_q);
+}
+
+__API__ k_err_t rust_tos_msg_q_create_dyn(k_msg_q_t *msg_q, unsigned long int msg_cnt){
+    return tos_msg_q_create_dyn(msg_q,msg_cnt);
+}
+
+__API__ k_err_t rust_tos_msg_q_destroy_dyn(k_msg_q_t *msg_q){
+    return tos_msg_q_destroy_dyn(msg_q);
+}
+
+__API__ k_err_t rust_tos_msg_q_flush(k_msg_q_t *msg_q){
+    return tos_msg_q_flush(msg_q);
+}
+
+__API__ k_err_t rust_tos_msg_q_pend(k_msg_q_t *msg_q, void **msg_ptr, k_tick_t timeout){
+    return tos_msg_q_pend(msg_q,msg_ptr,timeout);
+}
+
+__API__ k_err_t rust_tos_msg_q_post(k_msg_q_t *msg_q, void *msg_ptr){
+    return tos_msg_q_post(msg_q,msg_ptr);
+}
+
+__API__ k_err_t rust_tos_msg_q_post_all(k_msg_q_t *msg_q, void *msg_ptr){
+    return tos_msg_q_post_all(msg_q,msg_ptr);
+}
+//**********************************tos msg_q ****************************************
+#endif
+
+#if TOS_CFG_MAIL_QUEUE_EN > 0u
+//**********************************tos tos_mail ****************************************
 __API__ k_err_t rust_tos_mail_q_create(k_mail_q_t *mail_q, void *pool, size_t mail_cnt, size_t mail_size){
     return tos_mail_q_create(mail_q,pool,mail_cnt,mail_size);
 }
 
-// __API__ k_err_t rust_tos_mail_q_post(k_mail_q_t *mail_q, void *mail_buf, size_t mail_size){
-//     return tos_mail_q_post(mail_q,mail_buf,mail_size);
-// }
+__API__ k_err_t rust_tos_mail_q_destroy(k_mail_q_t *mail_q){
+    return tos_mail_q_destroy(mail_q);
+}
 
-// __API__ k_err_t rust_tos_mail_q_pend(k_mail_q_t *mail_q, void *mail_buf, size_t *mail_size, k_tick_t timeout){
-//     return tos_mail_q_pend(mail_q,mail_buf,mail_size,timeout);
-// }
+__API__ k_err_t rust_tos_mail_q_create_dyn(k_mail_q_t *mail_q, size_t mail_cnt, size_t mail_size){
+    return tos_mail_q_create_dyn(mail_q,mail_cnt,mail_size);
+}
+
+__API__ k_err_t rust_tos_mail_q_destroy_dyn(k_mail_q_t *mail_q){
+    return tos_mail_q_destroy_dyn(mail_q);
+}
+
+__API__ k_err_t rust_tos_mail_q_flush(k_mail_q_t *mail_q){
+    return tos_mail_q_flush(mail_q);
+}
+
+__API__ k_err_t rust_tos_mail_q_pend(k_mail_q_t *mail_q, void *mail_buf, size_t *mail_size, k_tick_t timeout){
+    return tos_mail_q_pend(mail_q,mail_buf,mail_size,timeout);
+}
+
+__API__ k_err_t rust_tos_mail_q_post(k_mail_q_t *mail_q, void *mail_buf, size_t mail_size){
+    return tos_mail_q_post(mail_q,mail_buf,mail_size);
+}
+
+__API__ k_err_t rust_tos_mail_q_post_all(k_mail_q_t *mail_q, void *mail_buf, size_t mail_size){
+    return tos_mail_q_post_all(mail_q,mail_buf,mail_size);
+}
+//**********************************tos tos_mail ****************************************
+#endif
+
+#if TOS_CFG_PRIORITY_MESSAGE_QUEUE_EN > 0u
+//**********************************tos prio msg_q ****************************************
+__API__ k_err_t rust_tos_prio_msg_q_create(k_prio_msg_q_t *prio_msg_q, void *pool, size_t msg_cnt){
+    return tos_prio_msg_q_create(prio_msg_q,pool,msg_cnt);
+}
+
+__API__ k_err_t rust_tos_prio_msg_q_destroy(k_prio_msg_q_t *prio_msg_q){
+    return tos_prio_msg_q_destroy(prio_msg_q);
+}
+
+__API__ k_err_t rust_tos_prio_msg_q_create_dyn(k_prio_msg_q_t *prio_msg_q, size_t msg_cnt){
+    return tos_prio_msg_q_create_dyn(prio_msg_q,msg_cnt);
+}
+
+__API__ k_err_t rust_tos_prio_msg_q_destroy_dyn(k_prio_msg_q_t *prio_msg_q){
+    return tos_prio_msg_q_destroy_dyn(prio_msg_q);
+}
+
+__API__ k_err_t rust_tos_prio_msg_q_flush(k_prio_msg_q_t *prio_msg_q){
+    return tos_prio_msg_q_flush(prio_msg_q);
+}
+
+__API__ k_err_t rust_tos_prio_msg_q_pend(k_prio_msg_q_t *prio_msg_q, void **msg_ptr, k_tick_t timeout){
+    return tos_prio_msg_q_pend(prio_msg_q, msg_ptr, timeout);
+}
+
+__API__ k_err_t rust_tos_prio_msg_q_post(k_prio_msg_q_t *prio_msg_q, void *msg_ptr, k_prio_t prio){
+    return tos_prio_msg_q_post(prio_msg_q,msg_ptr,prio);
+}
+
+__API__ k_err_t rust_tos_prio_msg_q_post_all(k_prio_msg_q_t *prio_msg_q, void *msg_ptr, k_prio_t prio){
+    return tos_prio_msg_q_post_all(prio_msg_q,msg_ptr,prio);
+}
+//**********************************tos prio msg_q ****************************************
+#endif
+
+
+#if TOS_CFG_PRIORITY_MAIL_QUEUE_EN > 0u
+//**********************************tos prio mail_q ****************************************
+__API__ k_err_t rust_tos_prio_mail_q_create(k_prio_mail_q_t *prio_mail_q, void *pool, size_t mail_cnt, size_t mail_size){
+    return tos_prio_mail_q_create(prio_mail_q,pool,mail_cnt,mail_size);
+}
+
+__API__ k_err_t rust_tos_prio_mail_q_destroy(k_prio_mail_q_t *prio_mail_q){
+    return tos_prio_mail_q_destroy(prio_mail_q);
+}
+
+__API__ k_err_t rust_tos_prio_mail_q_create_dyn(k_prio_mail_q_t *prio_mail_q, size_t mail_cnt, size_t mail_size){
+    return tos_prio_mail_q_create_dyn(prio_mail_q,mail_cnt,mail_size);
+}
+
+__API__ k_err_t rust_tos_prio_mail_q_destroy_dyn(k_prio_mail_q_t *prio_mail_q){
+    return tos_prio_mail_q_destroy_dyn(prio_mail_q);
+}
+
+__API__ k_err_t rust_tos_prio_mail_q_flush(k_prio_mail_q_t *prio_mail_q){
+    return tos_prio_mail_q_flush(prio_mail_q);
+}
+
+__API__ k_err_t rust_tos_prio_mail_q_pend(k_prio_mail_q_t *prio_mail_q, void *mail_buf, size_t *mail_size, k_tick_t timeout){
+    return tos_prio_mail_q_pend(prio_mail_q,mail_buf,mail_size,timeout);
+}
+
+__API__ k_err_t rust_tos_prio_mail_q_post(k_prio_mail_q_t *prio_mail_q, void *mail_buf, size_t mail_size, k_prio_t prio){
+    return tos_prio_mail_q_post(prio_mail_q,mail_buf,mail_size,prio);
+}
+
+__API__ k_err_t rust_tos_prio_mail_q_post_all(k_prio_mail_q_t *prio_mail_q, void *mail_buf, size_t mail_size, k_prio_t prio){
+    return tos_prio_mail_q_post_all(prio_mail_q,mail_buf,mail_size,prio);
+}
+//**********************************tos prio mail_q ****************************************
+#endif
+
+//**********************************tos ring_q ****************************************
+__API__ k_err_t rust_tos_ring_q_create(k_ring_q_t *ring_q, void *pool, size_t item_cnt, size_t item_size){
+    return tos_ring_q_create(ring_q,pool,item_cnt,item_size);
+}
+
+__API__ k_err_t rust_tos_ring_q_destroy(k_ring_q_t *ring_q){
+    return tos_ring_q_destroy(ring_q);
+}
+
+__API__ k_err_t rust_tos_ring_q_create_dyn(k_ring_q_t *ring_q, size_t item_cnt, size_t item_size){
+    return tos_ring_q_create_dyn(ring_q,item_cnt,item_size);
+}
+
+__API__ k_err_t rust_tos_ring_q_destroy_dyn(k_ring_q_t *ring_q){
+    return tos_ring_q_destroy_dyn(ring_q);
+}
+
+__API__ k_err_t rust_tos_ring_q_enqueue(k_ring_q_t *ring_q, void *item, size_t item_size){
+    return tos_ring_q_enqueue(ring_q,item,item_size);
+}
+
+__API__ k_err_t rust_tos_ring_q_dequeue(k_ring_q_t *ring_q, void *item, size_t *item_size){
+    return tos_ring_q_dequeue(ring_q,item,item_size);
+}
+
+__API__ k_err_t rust_tos_ring_q_flush(k_ring_q_t *ring_q){
+    return tos_ring_q_flush(ring_q);
+}
+
+__API__ int     rust_tos_ring_q_is_empty(k_ring_q_t *ring_q){
+    return tos_ring_q_is_empty(ring_q);
+}
+
+__API__ int     rust_tos_ring_q_is_full(k_ring_q_t *ring_q){
+    return tos_ring_q_is_full(ring_q);
+}
+//**********************************tos ring_q ****************************************
+
+//**********************************tos bin_heap ****************************************
+__API__ k_err_t rust_tos_bin_heap_create(k_bin_heap_t *bin_heap, void *pool, size_t item_cnt, size_t item_size, k_bin_heap_cmp cmp){
+    return tos_bin_heap_create(bin_heap,pool,item_cnt,item_size,cmp);
+}
+
+__API__ k_err_t rust_tos_bin_heap_destroy(k_bin_heap_t *bin_heap){
+    return tos_bin_heap_destroy(bin_heap);
+}
+
+__API__ k_err_t rust_tos_bin_heap_create_dyn(k_bin_heap_t *bin_heap, size_t item_cnt, size_t item_size, k_bin_heap_cmp cmp){
+    return tos_bin_heap_create_dyn(bin_heap,item_cnt,item_size,cmp);
+}
+
+__API__ k_err_t rust_tos_bin_heap_destroy_dyn(k_bin_heap_t *bin_heap){
+    return tos_bin_heap_destroy_dyn(bin_heap);
+}
+
+__API__ k_err_t rust_tos_bin_heap_push(k_bin_heap_t *bin_heap, void *item, size_t item_size){
+    return tos_bin_heap_push(bin_heap,item,item_size);
+}
+
+__API__ k_err_t rust_tos_bin_heap_pop(k_bin_heap_t *bin_heap, void *item, size_t *item_size){
+    return tos_bin_heap_pop(bin_heap,item,item_size);
+}
+
+__API__ k_err_t rust_tos_bin_heap_flush(k_bin_heap_t *bin_heap){
+    return tos_bin_heap_flush(bin_heap);
+}
+
+__API__ int rust_tos_bin_heap_is_empty(k_bin_heap_t *bin_heap){
+    return tos_bin_heap_is_empty(bin_heap);
+}
+
+__API__ int rust_tos_bin_heap_is_full(k_bin_heap_t *bin_heap){
+    return tos_bin_heap_is_full(bin_heap);
+}
+//**********************************tos bin_heap ****************************************
+
+
+//**********************************tos pro_q ****************************************
+__API__ k_err_t rust_tos_prio_q_create(k_prio_q_t *prio_q, void *mgr_array, void *pool, size_t item_cnt, size_t item_size){
+    return tos_prio_q_create(prio_q,mgr_array,pool,item_cnt,item_size);
+}
+
+__API__ k_err_t rust_tos_prio_q_destroy(k_prio_q_t *prio_q){
+    return tos_prio_q_destroy(prio_q);
+}
+
+__API__ k_err_t rust_tos_prio_q_create_dyn(k_prio_q_t *prio_q, size_t item_cnt, size_t item_size){
+    return tos_prio_q_create_dyn(prio_q,item_cnt,item_size);
+}
+
+__API__ k_err_t rust_tos_prio_q_destroy_dyn(k_prio_q_t *prio_q){
+    return tos_prio_q_destroy_dyn(prio_q);
+}
+
+__API__ k_err_t rust_tos_prio_q_enqueue(k_prio_q_t *prio_q, void *item, size_t item_size, k_prio_t prio){
+    return tos_prio_q_enqueue(prio_q,item,item_size,prio);
+}
+
+__API__ k_err_t rust_tos_prio_q_dequeue(k_prio_q_t *prio_q, void *item, size_t *item_size, k_prio_t *prio){
+    return tos_prio_q_dequeue(prio_q,item,item_size,prio);
+}
+
+__API__ k_err_t rust_tos_prio_q_flush(k_prio_q_t *prio_q){
+    return tos_prio_q_flush(prio_q);
+}
+
+__API__ int rust_tos_prio_q_is_empty(k_prio_q_t *prio_q){
+    return tos_prio_q_is_empty(prio_q);
+}
+
+__API__ int rust_tos_prio_q_is_full(k_prio_q_t *prio_q){
+    return tos_prio_q_is_full(prio_q);
+}
+//**********************************tos pro_q ****************************************
+
+#if TOS_CFG_TIMER_EN > 0u
+//**********************************tos timer ****************************************
+__API__ k_err_t rust_tos_timer_create(k_timer_t *tmr, k_tick_t delay, k_tick_t period,
+                                        k_timer_callback_t callback, void *cb_arg, k_opt_t opt)
+{
+    return tos_timer_create(tmr,delay,period,callback,cb_arg,opt);
+}
+
+__API__ k_err_t rust_tos_timer_destroy(k_timer_t *tmr){
+    return tos_timer_destroy(tmr);
+}
+
+__API__ k_err_t rust_tos_timer_start(k_timer_t *tmr){
+    return tos_timer_start(tmr);
+}
+
+__API__ k_err_t rust_tos_timer_stop(k_timer_t *tmr){
+    return tos_timer_stop(tmr);
+}
+
+__API__ k_err_t rust_tos_timer_delay_change(k_timer_t *tmr, k_tick_t delay){
+    return tos_timer_delay_change(tmr,delay);
+}
+
+__API__ k_err_t rust_tos_timer_period_change(k_timer_t *tmr, k_tick_t period){
+    return tos_timer_period_change(tmr,period);
+}
+
+__KNL__ void rust_timer_update(void){
+    return timer_update();
+}
+
+__KNL__ k_err_t rust_timer_init(void){
+    return timer_init();
+}
+
+__KNL__ k_tick_t rust_timer_next_expires_get(void){
+    return timer_next_expires_get();
+}
+//**********************************tos timer ****************************************
+#endif
+
+//**********************************tos stopwatch ****************************************
+__API__ k_err_t rust_tos_stopwatch_create(k_stopwatch_t *stopwatch){
+    return tos_stopwatch_create(stopwatch);
+}
+
+__API__ k_err_t rust_tos_stopwatch_destroy(k_stopwatch_t *stopwatch){
+    return tos_stopwatch_destroy(stopwatch);
+}
+
+__API__ k_err_t rust_tos_stopwatch_countdown(k_stopwatch_t *stopwatch, k_tick_t tick){
+    return tos_stopwatch_countdown(stopwatch,tick);
+}
+
+__API__ k_err_t rust_tos_stopwatch_countdown_ms(k_stopwatch_t *stopwatch, k_time_t millisec){
+    return tos_stopwatch_countdown_ms(stopwatch,millisec);
+}
+
+__API__ void rust_tos_stopwatch_delay(k_tick_t tick){
+    return tos_stopwatch_delay(tick);
+}
+
+__API__ void rust_tos_stopwatch_delay_ms(k_time_t millisec){
+    return tos_stopwatch_delay_ms(millisec);
+}
+
+__API__ k_tick_t rust_tos_stopwatch_remain(k_stopwatch_t *stopwatch){
+    return tos_stopwatch_remain(stopwatch);
+}
+
+__API__ k_time_t rust_tos_stopwatch_remain_ms(k_stopwatch_t *stopwatch){
+    return tos_stopwatch_remain_ms(stopwatch);
+}
+
+__API__ int rust_tos_stopwatch_is_expired(k_stopwatch_t *stopwatch){
+    return tos_stopwatch_is_expired(stopwatch);
+}
+//**********************************tos stopwatch ****************************************
+
+//**********************************tos bitmap ****************************************
+__API__ k_err_t     rust_tos_bitmap_create_empty(k_bitmap_t *bitmap, k_bmtbl_t *bitmap_tbl, uint32_t bit_max){
+    return tos_bitmap_create_empty(bitmap,bitmap_tbl,bit_max);
+}
+
+__API__ k_err_t     rust_tos_bitmap_create_full(k_bitmap_t *bitmap, k_bmtbl_t *bitmap_tbl, uint32_t bit_max){
+    return tos_bitmap_create_full(bitmap,bitmap_tbl,bit_max);
+}
+
+__API__ k_err_t     rust_tos_bitmap_destroy(k_bitmap_t *bitmap){
+    return tos_bitmap_destroy(bitmap);
+}
+
+__API__ k_err_t     rust_tos_bitmap_set(k_bitmap_t *bitmap, uint32_t bit){
+    return tos_bitmap_set(bitmap,bit);
+}
+
+__API__ k_err_t     rust_tos_bitmap_reset(k_bitmap_t *bitmap, uint32_t bit){
+    return tos_bitmap_reset(bitmap,bit);
+}
+
+__API__ int         rust_tos_bitmap_is_set(k_bitmap_t *bitmap, uint32_t bit){
+    return tos_bitmap_is_set(bitmap,bit);
+}
+
+__API__ int         rust_tos_bitmap_is_reset(k_bitmap_t *bitmap, uint32_t bit){
+    return tos_bitmap_is_reset(bitmap,bit);
+}
+__API__ int         rust_tos_bitmap_lsb(k_bitmap_t *bitmap){
+    return tos_bitmap_lsb(bitmap);
+}
+//**********************************tos bitmap ****************************************
+
+//**********************************tos pm management ****************************************
+#if TOS_CFG_PWR_MGR_EN > 0u
+#if TOS_CFG_TICKLESS_EN > 0u
+__API__ k_err_t rust_tos_pm_cpu_lpwr_mode_set(k_cpu_lpwr_mode_t cpu_lpwr_mode){
+    return tos_pm_cpu_lpwr_mode_set(cpu_lpwr_mode);
+}
+#endif
+__API__ k_err_t rust_tos_pm_device_register(k_pm_device_t *device){
+    return tos_pm_device_register(device);
+}
+#endif
+
+#if TOS_CFG_TICKLESS_EN > 0u
+__API__ void rust_tos_tickless_wkup_alarm_install(k_cpu_lpwr_mode_t mode, k_tickless_wkup_alarm_t *wkup_alarm){
+    return tos_tickless_wkup_alarm_install(mode,wkup_alarm);
+}
+
+__API__ k_err_t rust_tos_tickless_wkup_alarm_init(k_cpu_lpwr_mode_t mode){
+    return tos_tickless_wkup_alarm_init(mode);
+}
+#endif
+//**********************************tos pm management ****************************************
+
 
 
 //tos event
@@ -484,14 +966,132 @@ int rust_tos_chr_fifo_is_full(k_chr_fifo_t *chr_fifo){
 
 
 //CMSIS
-int rust_osKernelRunning(){
+osStatus rust_osKernelInitialize(void){
+    return osKernelInitialize();
+}
+
+osStatus rust_osKernelStart(void){
+    return osKernelStart();
+}
+
+int32_t rust_osKernelRunning(void){
     return osKernelRunning();
 }
 
-// uint32_t
-uint32_t rust_osKernelSysTick(){
+uint32_t rust_osKernelSysTick(void){
     return osKernelSysTick();
 }
+
+osThreadId rust_osThreadCreate(const osThreadDef_t *thread_def, void *argument){
+    return osThreadCreate(thread_def,argument);
+}
+
+osThreadId rust_osThreadGetId(void){
+    return osThreadGetId();
+}
+
+osStatus rust_osThreadTerminate(osThreadId thread_id){
+    return osThreadTerminate(thread_id);
+}
+
+osStatus rust_osThreadYield(void){
+    return osThreadYield();
+}
+
+osStatus rust_osThreadSetPriority(osThreadId thread_id, osPriority priority){
+    return osThreadSetPriority(thread_id,priority);
+}
+
+osPriority rust_osThreadGetPriority(osThreadId thread_id){
+    return osThreadGetPriority(thread_id);
+}
+
+osStatus rust_osDelay(uint32_t millisec){
+    return osDelay(millisec);
+}
+
+osTimerId rust_osTimerCreate(const osTimerDef_t *timer_def, os_timer_type type, void *argument){
+    return osTimerCreate(timer_def,type,argument);
+}
+
+osStatus rust_osTimerStart(osTimerId timer_id, uint32_t millisec){
+    return osTimerStart(timer_id,millisec);
+}
+
+osStatus rust_osTimerStop(osTimerId timer_id){
+    return osTimerStop(timer_id);
+}
+
+osStatus rust_osTimerDelete(osTimerId timer_id){
+    return osTimerDelete(timer_id);
+}
+
+osMutexId rust_osMutexCreate(const osMutexDef_t *mutex_def){
+    return osMutexCreate(mutex_def);
+}
+
+osStatus rust_osMutexWait(osMutexId mutex_id, uint32_t millisec){
+    return osMutexWait(mutex_id,millisec);
+}
+
+osStatus rust_osMutexRelease(osMutexId mutex_id){
+    return osMutexRelease(mutex_id);
+}
+
+osStatus rust_osMutexDelete(osMutexId mutex_id){
+    return osMutexDelete(mutex_id);
+}
+
+
+
+osSemaphoreId rust_osSemaphoreCreate(const osSemaphoreDef_t *semaphore_def, int32_t count){
+    return osSemaphoreCreate(semaphore_def,count);
+}
+
+int32_t rust_osSemaphoreWait(osSemaphoreId semaphore_id, uint32_t millisec){
+    return osSemaphoreWait(semaphore_id,millisec);
+}
+
+osStatus rust_osSemaphoreRelease(osSemaphoreId semaphore_id){
+    return osSemaphoreRelease(semaphore_id);
+}
+
+osStatus rust_osSemaphoreDelete(osSemaphoreId semaphore_id){
+    return osSemaphoreDelete(semaphore_id);
+}
+
+
+osPoolId rust_osPoolCreate(const osPoolDef_t *pool_def){
+    return osPoolCreate(pool_def);
+}
+
+void * rust_osPoolAlloc(osPoolId pool_id){
+    return osPoolAlloc(pool_id);
+}
+
+void * rust_osPoolCAlloc(osPoolId pool_id){
+    return osPoolCAlloc(pool_id);
+}
+
+osStatus rust_osPoolFree(osPoolId pool_id, void *block){
+    return osPoolFree(pool_id,block);
+}
+
+#if TOS_CFG_MESSAGE_QUEUE_EN > 0u
+osMessageQId rust_osMessageCreate(const osMessageQDef_t *queue_def, osThreadId thread_id){
+    return osMessageCreate(queue_def,thread_id);
+}
+
+osStatus rust_osMessagePut(osMessageQId queue_id, uint32_t info, uint32_t millisec){
+    return osMessagePut(queue_id,info,millisec);
+}
+
+osEvent rust_osMessageGet(osMessageQId queue_id, uint32_t millisec){
+    return osMessageGet(queue_id, millisec);
+}
+#endif
+
+
 
 //system management
 __API__ int rust_tos_knl_is_running(){
