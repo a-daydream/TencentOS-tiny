@@ -73,8 +73,9 @@ pub extern "C" fn application_entry_rust() -> c_void {
         // rust_test_tos_mmblk_free();
         //*************************end of tos mmblk**************************
         
-
-
+        // ************************start tos mutex***************************
+        rust_test_tos_mutex_create();
+        // ************************start tos mutex***************************
 
         //end
         
@@ -601,7 +602,26 @@ pub fn rust_test_tos_mmblk_free(){
 //***************************end of  tos mmblk test****************************
 
 //****************************tos mutex test********************************
-//to do
+
+
+pub fn rust_test_tos_mutex_create(){
+    unsafe{
+        let mut  test_mutex_00 :  k_mutex_t = k_mutex_t::default();
+        let mut err = rust_tos_mutex_create(&mut test_mutex_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mutex_create failed\r\n".as_ptr());
+            return ;
+        }
+
+        err = rust_tos_mutex_destroy(&mut test_mutex_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mutex_destroy failed\r\n".as_ptr());
+            return ;
+        }
+        rust_print("RUST: rust_test_tos_mutex_create pass\r\n".as_ptr());
+    }
+}
+
 //****************************end  of tos mutex test************************
 
 //****************************tos completion test********************************
