@@ -15,7 +15,7 @@ use cty::*;
 #[no_mangle]
 pub extern "C" fn application_entry_rust() -> c_void {
     unsafe {
-        rust_print(b"[+] Welcome to the RUST-WORLD in TencentOS :)\r\n".as_ptr());
+        rust_print(b"[+] Welcome to the RUST-WORLD in TencentOS :)\r\n\0".as_ptr());
 
         rust_oled_init();
         rust_oled_clear();
@@ -74,7 +74,10 @@ pub extern "C" fn application_entry_rust() -> c_void {
         //*************************end of tos mmblk**************************
         
         // ************************start tos mutex***************************
-        rust_test_tos_mutex_create();
+        // rust_test_tos_mutex_create();
+        // rust_test_tos_mutex_create_dyn();
+        // rust_test_tos_mutex_destroy(); // some bug 
+        rust_test_tos_mutex_pend();
         // ************************start tos mutex***************************
 
         //end
@@ -113,7 +116,7 @@ unsafe extern "C" fn  test_task_entry(arg : *mut c_void)
     // count_delay_abort = count_delay_abort + 1;
     // let delay_1 : k_time_t = u32::MAX - 1;
     // rust_tos_task_delay(rust_tos_millisec2tick(delay_1));
-    rust_print("test_task_entry\r\n".as_ptr());
+    rust_print("test_task_entry\r\n\0".as_ptr());
     // rust_tos_sleep_ms(1000);
     return ;
 }
@@ -135,7 +138,7 @@ pub fn rust_test_tos_task_create(){
                                             0);
         // rust_print_num(err as u32);
         if(err != K_ERR_TASK_PRIO_INVALID){
-            rust_print("RUST: rust_tos_task_create  test idle failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_create  test idle failed\r\n\0".as_ptr());
             return ;
         }
 
@@ -148,7 +151,7 @@ pub fn rust_test_tos_task_create(){
                                     0);
         // rust_print_num(err as u32);                  
         if(err != K_ERR_TASK_PRIO_INVALID){
-            rust_print("RUST: rust_tos_task_create out of prio failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_create out of prio failed\r\n\0".as_ptr());
             return ;
         }
 
@@ -161,17 +164,17 @@ pub fn rust_test_tos_task_create(){
                                     0);
         // rust_print_num(err as u32);                  
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_task_create create failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_create create failed\r\n\0".as_ptr());
             return ;
         }
 
         err = rust_tos_task_destroy(&mut test_task_00 as *mut _);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_task_destroy  failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_destroy  failed\r\n\0".as_ptr());
             return ;
         }
 
-        rust_print("RUST: rust_test_tos_task_create pass\r\n".as_ptr());
+        rust_print("RUST: rust_test_tos_task_create pass\r\n\0".as_ptr());
     }
 }
 
@@ -184,7 +187,7 @@ pub fn rust_test_tos_task_destroy(){
         let mut err = rust_tos_task_destroy(&mut k_idle_task as *mut _);
         rust_print_num(err as u32);
         if(err != K_ERR_TASK_DESTROY_IDLE){
-            rust_print("RUST: rust_tos_task_destroy  test idle failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_destroy  test idle failed\r\n\0".as_ptr());
             return ;
         }
         let mut test_task_00 = k_task_t::default();
@@ -202,18 +205,18 @@ pub fn rust_test_tos_task_destroy(){
         
         rust_print_num(err as u32);                  
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_task_create create failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_create create failed\r\n\0".as_ptr());
             return ;
         }
 
         err = rust_tos_task_destroy(&mut test_task_00 as *mut _);
         rust_print_num(err as u32);  
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_task_destroy test_task_00 failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_destroy test_task_00 failed\r\n\0".as_ptr());
             return ;
         }
 
-        rust_print("RUST: rust_test_tos_task_destroy pass\r\n".as_ptr()); 
+        rust_print("RUST: rust_test_tos_task_destroy pass\r\n\0".as_ptr()); 
     }
 }
 
@@ -230,13 +233,13 @@ pub fn rust_test_tos_task_delay(){
         begin = rust_tos_systick_get();
         let err = rust_tos_task_delay(delay);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_task_delay failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_delay failed\r\n\0".as_ptr());
             return ;
         }
         end = rust_tos_systick_get();
         rust_print_num(begin);
         rust_print_num(end);
-        rust_print("RUST: rust_test_tos_task_delay pass\r\n".as_ptr());
+        rust_print("RUST: rust_test_tos_task_delay pass\r\n\0".as_ptr());
     }
 }
 
@@ -259,27 +262,27 @@ pub fn rust_test_tos_task_delay_abort(){
                                                 512, 
                                                 0);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_task_create  test delay abort failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_create  test delay abort failed\r\n\0".as_ptr());
             return ;
         }
 
         
         // if(delay_abort_count != 0){
-        //     rust_print("RUST: delay_abort_count set 0 failed\r\n".as_ptr());
+        //     rust_print("RUST: delay_abort_count set 0 failed\r\n\0".as_ptr());
         //     return ;
         // }
 
         let delay_1 : k_time_t = 1000;
         err =rust_tos_task_delay(rust_tos_millisec2tick(delay_1));
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_task_delay 100 failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_delay 100 failed\r\n\0".as_ptr());
             return ;
         }
         
 
         // rust_print_num(count);
         // if(delay_abort_count != 0){
-        //     rust_print("RUST: rust_tos_task_delay abort failed\r\n".as_ptr());
+        //     rust_print("RUST: rust_tos_task_delay abort failed\r\n\0".as_ptr());
         //     return ;   
         // }
 
@@ -288,16 +291,16 @@ pub fn rust_test_tos_task_delay_abort(){
         err =rust_tos_task_delay(rust_tos_millisec2tick(delay_1));
         // rust_print_num(err as u32);
         // if(delay_abort_count != 1){
-        //     rust_print("RUST: rust_tos_task_delay abort count + 1 failed\r\n".as_ptr());
+        //     rust_print("RUST: rust_tos_task_delay abort count + 1 failed\r\n\0".as_ptr());
         //     return ; 
         // }
 
         err = rust_tos_task_destroy(&mut test_task_00 as *mut _);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_task_destroy failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_destroy failed\r\n\0".as_ptr());
             return ;
         }
-        rust_print("RUST: rust_test_tos_task_delay_abort pass\r\n".as_ptr());
+        rust_print("RUST: rust_test_tos_task_delay_abort pass\r\n\0".as_ptr());
 
     }
 }
@@ -317,27 +320,27 @@ pub fn rust_test_tos_task_suspend_resume(){
             512, 
             0);  
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_task_create  test delay abort failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_create  test delay abort failed\r\n\0".as_ptr());
             return ;
         }
 
         // rust_tos_task_delay(500);
 
         err = rust_tos_task_suspend(&mut test_task_00 as *mut _);
-        // rust_print("RUST: rust_tos_task_suspend \r\n".as_ptr());
+        // rust_print("RUST: rust_tos_task_suspend \r\n\0".as_ptr());
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_task_suspend failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_suspend failed\r\n\0".as_ptr());
             return ;
         }
 
         let delay_1 : k_time_t = 1000;
         rust_tos_task_delay(rust_tos_millisec2tick(delay_1));
-        rust_print("RUST: rust_tos_task_suspend \r\n".as_ptr());
+        rust_print("RUST: rust_tos_task_suspend \r\n\0".as_ptr());
 
         err = rust_tos_task_resume(&mut test_task_00 as *mut _);
-        // rust_print("RUST: rust_tos_task_resume \r\n".as_ptr());
+        // rust_print("RUST: rust_tos_task_resume \r\n\0".as_ptr());
         // if(err != K_ERR_NONE){
-        //     rust_print("RUST: rust_tos_task_resume failed\r\n".as_ptr());
+        //     rust_print("RUST: rust_tos_task_resume failed\r\n\0".as_ptr());
         //     return ;
         // }
         
@@ -346,10 +349,10 @@ pub fn rust_test_tos_task_suspend_resume(){
 
         err = rust_tos_task_destroy(&mut test_task_00 as *mut _);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_task_destroy failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_destroy failed\r\n\0".as_ptr());
             return ;
         }
-        rust_print("RUST: rust_test_tos_task_suspend_resume pass\r\n".as_ptr());
+        rust_print("RUST: rust_test_tos_task_suspend_resume pass\r\n\0".as_ptr());
     }
  
 }
@@ -371,28 +374,28 @@ pub fn rust_test_tos_task_prio_change(){
         
         err = rust_tos_task_prio_change(&mut test_task_00 as *mut _,  9 as k_prio_t);
         if(err != K_ERR_TASK_PRIO_INVALID){
-            rust_print("RUST: rust_tos_task_prio_change to idle  test failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_prio_change to idle  test failed\r\n\0".as_ptr());
             return ;
         }
 
         err = rust_tos_task_prio_change(&mut test_task_00 as *mut _,  4 as k_prio_t);
         if(test_task_00.prio != (4 as k_prio_t)){
-            rust_print("RUST: rust_tos_task_prio_change  failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_prio_change  failed\r\n\0".as_ptr());
             return ;
         }
 
         err = rust_tos_task_prio_change(&mut test_task_00 as *mut _,  2 as k_prio_t);
         if(test_task_00.prio != (2 as k_prio_t)){
-            rust_print("RUST: rust_tos_task_prio_change  failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_prio_change  failed\r\n\0".as_ptr());
             return ;
         }
 
         err = rust_tos_task_destroy(&mut test_task_00 as *mut _);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_task_destroy failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_destroy failed\r\n\0".as_ptr());
             return ;
         }
-        rust_print("RUST: rust_test_tos_task_prio_change pass\r\n".as_ptr());
+        rust_print("RUST: rust_test_tos_task_prio_change pass\r\n\0".as_ptr());
     }
 }
 
@@ -412,7 +415,7 @@ pub fn rust_test_tos_task_yeild(){
             512, 
             0);  
 
-        rust_print("RUST: curr task  not yeild\r\n".as_ptr());
+        rust_print("RUST: curr task  not yeild\r\n\0".as_ptr());
         
         while (true) {
             rust_tos_task_yield();
@@ -420,10 +423,10 @@ pub fn rust_test_tos_task_yeild(){
         
         err = rust_tos_task_destroy(&mut test_task_00 as *mut _);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_task_destroy failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_task_destroy failed\r\n\0".as_ptr());
             return ;
         }
-        rust_print("RUST: rust_test_tos_task_yeild pass\r\n".as_ptr());
+        rust_print("RUST: rust_test_tos_task_yeild pass\r\n\0".as_ptr());
     }
 }
 
@@ -450,60 +453,60 @@ pub fn rust_test_tos_mmblk_pool_create(){
 
         let mut err = rust_tos_mmblk_pool_create(&mut test_mmblk_pool_00 as *mut _, &mut mmblk_pool_buffer_00 as *mut _ as *mut c_void, 5, 32);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_mmblk_pool_create failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mmblk_pool_create failed\r\n\0".as_ptr());
             return ;
         }
 
         err = rust_tos_mmblk_pool_create(&mut test_mmblk_pool_01 as *mut _, &mut mmblk_pool_buffer_01 as *mut _ as *mut c_void, 5, 32);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_mmblk_pool_create failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mmblk_pool_create failed\r\n\0".as_ptr());
             return ;
         }
 
         err = rust_tos_mmblk_pool_create(&mut test_mmblk_pool_02 as *mut _, &mut mmblk_pool_buffer_02 as *mut _ as *mut c_void, 5, 32);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_mmblk_pool_create failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mmblk_pool_create failed\r\n\0".as_ptr());
             return ;
         }
 
         err = rust_tos_mmblk_pool_destroy(&mut test_mmblk_pool_00);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_mmblk_pool_destroy failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mmblk_pool_destroy failed\r\n\0".as_ptr());
             return ;
         }
 
         err = rust_tos_mmblk_pool_destroy(&mut test_mmblk_pool_01);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_mmblk_pool_destroy failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mmblk_pool_destroy failed\r\n\0".as_ptr());
             return ;
         }
 
         err = rust_tos_mmblk_pool_destroy(&mut test_mmblk_pool_02);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_mmblk_pool_destroy failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mmblk_pool_destroy failed\r\n\0".as_ptr());
             return ;
         }
 
         err = rust_tos_mmblk_pool_create(&mut test_mmblk_pool_00 as *mut _, 0 as *mut c_void, 5, 32);
         if(err != K_ERR_OBJ_PTR_NULL){
-            rust_print("RUST: rust_tos_mmblk_pool_create 0 failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mmblk_pool_create 0 failed\r\n\0".as_ptr());
             return ;
         }
 
 
         // err = rust_tos_mmblk_pool_create(&mut test_mmblk_pool_00 as *mut _, ( (mmblk_pool_buffer_01[0] as u32 ) + 1) as *mut c_void, 5, 32);
         // if(err != K_ERR_MMBLK_INVALID_POOL_ADDR){
-        //     rust_print("RUST: rust_tos_mmblk_pool_create invalid failed\r\n".as_ptr());
+        //     rust_print("RUST: rust_tos_mmblk_pool_create invalid failed\r\n\0".as_ptr());
         //     return ;
         // }
 
         err = rust_tos_mmblk_pool_create(&mut test_mmblk_pool_01 as *mut _, &mut mmblk_pool_buffer_01 as *mut _ as *mut c_void, 5, 33);
         if(err != K_ERR_MMBLK_INVALID_BLK_SIZE){
-            rust_print("RUST: rust_tos_mmblk_pool_create size failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mmblk_pool_create size failed\r\n\0".as_ptr());
             return ;
         }
 
-        rust_print("RUST: rust_test_tos_mmblk_pool_create pass\r\n".as_ptr());
+        rust_print("RUST: rust_test_tos_mmblk_pool_create pass\r\n\0".as_ptr());
     }
 
 }
@@ -513,10 +516,10 @@ pub fn rust_test_tos_mmblk_pool_destroy(){
     unsafe{
         let mut err = rust_tos_mmblk_pool_destroy(&mut test_mmblk_pool_00 as *mut _);
         if (  err != K_ERR_OBJ_INVALID_ALLOC_TYPE ) {
-            rust_print("RUST: rust_tos_mmblk_pool_destroy  failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mmblk_pool_destroy  failed\r\n\0".as_ptr());
             return ;
         }
-        rust_print("RUST: rust_test_tos_mmblk_pool_destroy pass\r\n".as_ptr());
+        rust_print("RUST: rust_test_tos_mmblk_pool_destroy pass\r\n\0".as_ptr());
     }
 }
 
@@ -525,7 +528,7 @@ pub fn rust_test_tos_mmblk_alloc(){
         let mut test_mmblk_pool_00 = k_mmblk_pool_t::default();
         let mut err = rust_tos_mmblk_pool_create(&mut test_mmblk_pool_00 as *mut _, &mut mmblk_pool_buffer_00 as *mut _ as *mut c_void, 5, 32);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_mmblk_pool_create failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mmblk_pool_create failed\r\n\0".as_ptr());
             return ;
         }
         let mut blk = test_mmblk_pool_00.free_list;
@@ -533,27 +536,27 @@ pub fn rust_test_tos_mmblk_alloc(){
         for i in 1..6  {
             err = rust_tos_mmblk_alloc(&mut test_mmblk_pool_00 as *mut _, pblk);
             if(err != K_ERR_NONE){
-                rust_print("RUST: rust_tos_mmblk_alloc failed\r\n".as_ptr());
+                rust_print("RUST: rust_tos_mmblk_alloc failed\r\n\0".as_ptr());
                 return ;
             }
             if(pblk == (0 as * mut  *mut c_void)){
-                rust_print("RUST: blk ==null failed\r\n".as_ptr());
+                rust_print("RUST: blk ==null failed\r\n\0".as_ptr());
                 return ;
             }
             
         }
         err = rust_tos_mmblk_alloc(&mut test_mmblk_pool_00 as *mut _, 0 as * mut  *mut c_void);
         if(err != K_ERR_MMBLK_POOL_EMPTY){
-            rust_print("RUST: rust_tos_mmblk_alloc empty\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mmblk_alloc empty\r\n\0".as_ptr());
             return ;
         }
 
         err =rust_tos_mmblk_pool_destroy(&mut test_mmblk_pool_00 as *mut _);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_mmblk_pool_destroy failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mmblk_pool_destroy failed\r\n\0".as_ptr());
             return ;
         }
-        rust_print("RUST: rust_test_tos_mmblk_alloc pass\r\n".as_ptr());
+        rust_print("RUST: rust_test_tos_mmblk_alloc pass\r\n\0".as_ptr());
     }
 }
 
@@ -562,7 +565,7 @@ pub fn rust_test_tos_mmblk_free(){
         let mut test_mmblk_pool_00 = k_mmblk_pool_t::default();
         let mut err = rust_tos_mmblk_pool_create(&mut test_mmblk_pool_00 as *mut _,&mut  mmblk_pool_buffer_00 as *mut _ as *mut c_void, 5, 32);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_mmblk_pool_create failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mmblk_pool_create failed\r\n\0".as_ptr());
             return ;
         }
 
@@ -570,32 +573,32 @@ pub fn rust_test_tos_mmblk_free(){
         let pblk = &mut blk as *mut *mut c_void;
         err = rust_tos_mmblk_alloc(&mut test_mmblk_pool_00 as *mut _, pblk);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_mmblk_alloc failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mmblk_alloc failed\r\n\0".as_ptr());
             return ;
         }
         if(pblk == (0 as * mut  *mut c_void)){
-            rust_print("RUST: blk ==null failed\r\n".as_ptr());
+            rust_print("RUST: blk ==null failed\r\n\0".as_ptr());
             return ;
         }
 
         err = rust_tos_mmblk_free(&mut test_mmblk_pool_00 as *mut _, blk);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_mmblk_alloc failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mmblk_alloc failed\r\n\0".as_ptr());
             return ;
         }
 
         err = rust_tos_mmblk_free(&mut test_mmblk_pool_00 as *mut _, blk);
         if(err != K_ERR_MMBLK_POOL_FULL){
-            rust_print("RUST: rust_tos_mmblk_alloc free failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mmblk_alloc free failed\r\n\0".as_ptr());
             return ;
         }
 
         err =rust_tos_mmblk_pool_destroy(&mut test_mmblk_pool_00 as *mut _);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_mmblk_pool_destroy failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mmblk_pool_destroy failed\r\n\0".as_ptr());
             return ;
         }
-        rust_print("RUST: rust_test_tos_mmblk_free pass\r\n".as_ptr());
+        rust_print("RUST: rust_test_tos_mmblk_free pass\r\n\0".as_ptr());
     }
 }
 
@@ -609,18 +612,114 @@ pub fn rust_test_tos_mutex_create(){
         let mut  test_mutex_00 :  k_mutex_t = k_mutex_t::default();
         let mut err = rust_tos_mutex_create(&mut test_mutex_00 as *mut _);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_mutex_create failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mutex_create failed\r\n\0".as_ptr());
             return ;
         }
 
         err = rust_tos_mutex_destroy(&mut test_mutex_00 as *mut _);
         if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_mutex_destroy failed\r\n".as_ptr());
+            rust_print("RUST: rust_tos_mutex_destroy failed\r\n\0".as_ptr());
             return ;
         }
-        rust_print("RUST: rust_test_tos_mutex_create pass\r\n".as_ptr());
+        rust_print("RUST: rust_test_tos_mutex_create pass\r\n\0".as_ptr());
     }
 }
+
+pub fn rust_test_tos_mutex_create_dyn(){
+    unsafe{
+        let mut  test_mutex_00 :  k_mutex_t = k_mutex_t::default();
+        let mut  test_mutex_00_dyn :  *mut *mut k_mutex_t = &mut test_mutex_00 as *mut _ as *mut *mut k_mutex_t;
+        let mut err = rust_tos_mutex_create_dyn(test_mutex_00_dyn);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mutex_create_dyn failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        err = rust_tos_mutex_destroy(*test_mutex_00_dyn);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mutex_destroy failed\r\n\0".as_ptr());
+            return ;
+        }
+        rust_print("RUST: rust_test_tos_mutex_create_dyn pass\r\n\0".as_ptr());
+    }
+}
+
+pub fn rust_test_tos_mutex_destroy(){
+    unsafe{
+
+        let mut  test_mutex_destroy :  k_mutex_t = k_mutex_t::default();
+    
+        let err = rust_tos_mutex_destroy(&mut test_mutex_destroy as *mut _);
+        rust_print_num(err as u32);
+        // if(err == K_ERR_OBJ_INVALID){
+        //     rust_print("RUST: rust_tos_mutex_destroy failed\r\n\0".as_ptr());
+        //     return ;
+        // }
+
+        rust_print("RUST: rust_test_tos_mutex_destroy pass\r\n\0".as_ptr());
+    }
+}
+
+unsafe extern "C" fn  test_mutex_pend_task_entry(arg : *mut c_void) 
+{
+    let mut mutex = arg as *mut _ as *mut k_mutex_t;
+    let mut err = rust_tos_mutex_pend(mutex);
+    if(err != K_ERR_NONE){
+        rust_print("RUST: rust_tos_mutex_pend failed\r\n\0".as_ptr());
+        return ;
+    }
+    rust_print("test_task_entry\r\n\0".as_ptr());
+    err = rust_tos_mutex_post(mutex);
+    if(err != K_ERR_NONE){
+        rust_print("RUST: rust_tos_mutex_post failed\r\n\0".as_ptr());
+        return ;
+    }
+    rust_tos_sleep_ms(1000);
+    return ;
+}
+pub fn rust_test_tos_mutex_pend(){
+    unsafe{
+        let mut  test_mutex_00 :  k_mutex_t = k_mutex_t::default();
+        let mut err = rust_tos_mutex_create(&mut test_mutex_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mutex_create failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        err = rust_tos_mutex_pend(&mut test_mutex_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mutex_pend failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        let mut test_task_00 = k_task_t::default();
+        let  task_name =   "test_mutex_pend_task".as_ptr() as *mut c_char ;
+        let  mut entry  : k_task_entry_t = Some(test_mutex_pend_task_entry);
+        let mut err  = rust_tos_task_create(&mut test_task_00 as *mut _, 
+            task_name, entry, 
+            &mut test_mutex_00 as *mut _ as *mut c_void, 
+            3 as k_prio_t , 
+            &mut test_task_stack_00[0], 
+            512, 
+            0);
+        rust_tos_sleep_ms(1000);
+        rust_print("RUST: sleep before post \r\n\0".as_ptr());
+
+        err = rust_tos_mutex_post(&mut test_mutex_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mutex_post failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        rust_tos_sleep_ms(1000);
+        rust_print("RUST: sleep after  post \r\n\0".as_ptr());    
+
+        rust_print("RUST: rust_test_tos_mutex_pend pass \r\n\0".as_ptr());        
+    }
+}
+
+
+
 
 //****************************end  of tos mutex test************************
 
@@ -702,40 +801,40 @@ pub fn  rust_test_tos_fifo_create() {
     unsafe {
         let mut err = rust_tos_chr_fifo_create(&mut test_fifo_00 as *mut _,fifo_buffer_00_ptr , 5);
         if (err != K_ERR_NONE) {
-            rust_print("RUST: fifo_00 create failed\r\n".as_ptr());
+            rust_print("RUST: fifo_00 create failed\r\n\0".as_ptr());
             return ;
         }
 
         err = rust_tos_chr_fifo_create(&mut test_fifo_01 as *mut _,fifo_buffer_01_ptr , 5);
         if (err != K_ERR_NONE) {
-            rust_print("RUST: fifo_01 create failed\r\n".as_ptr());
+            rust_print("RUST: fifo_01 create failed\r\n\0".as_ptr());
             return ;
         }
         
         err = rust_tos_chr_fifo_create(&mut test_fifo_02 as *mut _,fifo_buffer_02_ptr , 5);
         if (err != K_ERR_NONE){
-            rust_print("RUST: fifo_02 create failed\r\n".as_ptr());
+            rust_print("RUST: fifo_02 create failed\r\n\0".as_ptr());
             return ;
         }
         
         err = rust_tos_chr_fifo_destroy(&mut test_fifo_00  as *mut _);
         if (err != K_ERR_NONE) {
-            rust_print("RUST: fifo_00 destroy failed\r\n".as_ptr());
+            rust_print("RUST: fifo_00 destroy failed\r\n\0".as_ptr());
             return ;
         }
 
         err = rust_tos_chr_fifo_destroy(&mut test_fifo_01  as *mut _);
         if (err != K_ERR_NONE) {
-            rust_print("RUST: fifo_01 destroy failed\r\n".as_ptr());
+            rust_print("RUST: fifo_01 destroy failed\r\n\0".as_ptr());
             return ;
         }
 
         err = rust_tos_chr_fifo_destroy(&mut test_fifo_02 as *mut _);
         if (err != K_ERR_NONE) {
-            rust_print("RUST: fifo_02 destroy failed\r\n".as_ptr());
+            rust_print("RUST: fifo_02 destroy failed\r\n\0".as_ptr());
             return ;
         }
-        rust_print("RUST: rust_test_tos_fifo_create pass\r\n".as_ptr());
+        rust_print("RUST: rust_test_tos_fifo_create pass\r\n\0".as_ptr());
     }
 }
 
@@ -744,10 +843,10 @@ pub fn rust_test_tos_fifo_destory(){
     unsafe{
         let mut err = rust_tos_chr_fifo_destroy(&mut test_fifo_00 as *mut _);
         if (  err != K_ERR_OBJ_INVALID_ALLOC_TYPE && err != K_ERR_NONE ) {
-            rust_print("RUST: rust_test_tos_fifo_destory  failed\r\n".as_ptr());
+            rust_print("RUST: rust_test_tos_fifo_destory  failed\r\n\0".as_ptr());
             return ;
         }
-        rust_print("RUST: rust_test_tos_fifo_destory pass\r\n".as_ptr());
+        rust_print("RUST: rust_test_tos_fifo_destory pass\r\n\0".as_ptr());
     }
 }
 
@@ -759,7 +858,7 @@ pub fn rust_test_tos_fifo_char_push(){
         let mut err; 
         err = rust_tos_chr_fifo_create(&mut test_fifo_00 as *mut _,fifo_buffer_00_ptr , 5);
         if(err != K_ERR_NONE){
-            rust_print("RUST: tos_chr_fifo_create failed\r\n".as_ptr());
+            rust_print("RUST: tos_chr_fifo_create failed\r\n\0".as_ptr());
             return ;
         }else{
             let mut push_char : c_char = 'a' as c_char;
@@ -773,7 +872,7 @@ pub fn rust_test_tos_fifo_char_push(){
                 err  = rust_tos_chr_fifo_push(&mut test_fifo_00 as *mut _, push_char);
                 if(err != K_ERR_NONE){
                     rust_print_char(&push_char);
-                    rust_print("RUST: rust_tos_chr_fifo_push failed\r\n".as_ptr());
+                    rust_print("RUST: rust_tos_chr_fifo_push failed\r\n\0".as_ptr());
                     return ;
                 }
             }
@@ -782,7 +881,7 @@ pub fn rust_test_tos_fifo_char_push(){
 
             err = rust_tos_chr_fifo_push(&mut test_fifo_00 as *mut _, push_char); 
             if( err != K_ERR_RING_Q_FULL){
-                rust_print("RUST: rust_tos_chr_fifo_push full failed\r\n".as_ptr());
+                rust_print("RUST: rust_tos_chr_fifo_push full failed\r\n\0".as_ptr());
                 return ;
             }
  
@@ -791,27 +890,27 @@ pub fn rust_test_tos_fifo_char_push(){
                 err = rust_tos_chr_fifo_pop(&mut test_fifo_00 as *mut _, &mut data);
                 if( err != K_ERR_NONE){
                     rust_print_char(&data);
-                    rust_print("RUST: rust_tos_chr_fifo_pop failed\r\n".as_ptr());
+                    rust_print("RUST: rust_tos_chr_fifo_pop failed\r\n\0".as_ptr());
                     return ;
                 }
             }
             err = rust_tos_chr_fifo_pop(&mut test_fifo_00 as *mut _, &mut data);
 
             if( err != K_ERR_RING_Q_EMPTY){
-                rust_print("RUST: rust_tos_chr_fifo_pop empty failed\r\n".as_ptr());
+                rust_print("RUST: rust_tos_chr_fifo_pop empty failed\r\n\0".as_ptr());
                 return ;
             }
 
 
             err = rust_tos_chr_fifo_destroy(&mut test_fifo_00 as *mut _);
             if( err != K_ERR_NONE){
-                rust_print("RUST: rust_tos_chr_fifo_destroy_dyn  failed\r\n".as_ptr());
+                rust_print("RUST: rust_tos_chr_fifo_destroy_dyn  failed\r\n\0".as_ptr());
                 return ;
             }
         }
 
 
-        rust_print("RUST: rust_test_tos_fifo_char_push pass\r\n".as_ptr());
+        rust_print("RUST: rust_test_tos_fifo_char_push pass\r\n\0".as_ptr());
     }
 }
 
@@ -823,7 +922,7 @@ pub fn rust_test_tos_fifo_char_push_dyn(){
        
         err = rust_tos_chr_fifo_create_dyn(&mut test_fifo_00 as *mut _, 5);
         if(err != K_ERR_NONE){
-           rust_print("RUST: rust_tos_chr_fifo_create_dyn failed\r\n ".as_ptr());
+           rust_print("RUST: rust_tos_chr_fifo_create_dyn failed\r\n\0 ".as_ptr());
            return ;
         }else{
             let mut push_char : c_char = 'a' as c_char;
@@ -836,7 +935,7 @@ pub fn rust_test_tos_fifo_char_push_dyn(){
                 push_char = c as c_char;
                 err  = rust_tos_chr_fifo_push(&mut test_fifo_00 as *mut _, push_char);
                 if(err != K_ERR_NONE){
-                    rust_print("RUST: rust_tos_chr_fifo_push failed\r\n".as_ptr());
+                    rust_print("RUST: rust_tos_chr_fifo_push failed\r\n\0".as_ptr());
                     return ;
                 }
             }
@@ -845,7 +944,7 @@ pub fn rust_test_tos_fifo_char_push_dyn(){
 
             err = rust_tos_chr_fifo_push(&mut test_fifo_00 as *mut _, push_char); 
             if( err != K_ERR_RING_Q_FULL){
-                rust_print("RUST: rust_tos_chr_fifo_push full failed\r\n".as_ptr());
+                rust_print("RUST: rust_tos_chr_fifo_push full failed\r\n\0".as_ptr());
                 return ;
             }
  
@@ -853,7 +952,7 @@ pub fn rust_test_tos_fifo_char_push_dyn(){
             for n in 1..6 {
                 err = rust_tos_chr_fifo_pop(&mut test_fifo_00 as *mut _, &mut data);
                 if( err != K_ERR_NONE){
-                    rust_print("RUST: rust_tos_chr_fifo_pop full failed\r\n".as_ptr());
+                    rust_print("RUST: rust_tos_chr_fifo_pop full failed\r\n\0".as_ptr());
                     return ;
                 }
             }
@@ -861,18 +960,18 @@ pub fn rust_test_tos_fifo_char_push_dyn(){
 
 
             if( err != K_ERR_RING_Q_EMPTY){
-                rust_print("RUST: rust_tos_chr_fifo_pop empty failed\r\n".as_ptr());
+                rust_print("RUST: rust_tos_chr_fifo_pop empty failed\r\n\0".as_ptr());
                 return ;
             }
 
 
             err = rust_tos_chr_fifo_destroy_dyn(&mut test_fifo_00 as *mut _);
             if( err != K_ERR_NONE){
-                rust_print("RUST: rust_tos_chr_fifo_destroy_dyn failed\r\n".as_ptr());
+                rust_print("RUST: rust_tos_chr_fifo_destroy_dyn failed\r\n\0".as_ptr());
             }
             
         }
-        rust_print("RUST: rust_test_tos_fifo_char_push pass \r\n".as_ptr());
+        rust_print("RUST: rust_test_tos_fifo_char_push pass \r\n\0".as_ptr());
     }
 }
 
@@ -886,7 +985,7 @@ pub fn rust_test_tos_fifo_stream_push(){
         
         if(err !=  K_ERR_NONE){
             rust_print_num(err as u32);
-            rust_print("rust_tos_chr_fifo_create failed\r\n".as_ptr());
+            rust_print("rust_tos_chr_fifo_create failed\r\n\0".as_ptr());
             return ;
         }
         
@@ -897,46 +996,46 @@ pub fn rust_test_tos_fifo_stream_push(){
         let mut count  = rust_tos_chr_fifo_push_stream(&mut test_fifo_00 as *mut _, &mut stream[0], 5);
         if(count != 5){
             rust_print_i32(count);
-            rust_print("rust_tos_chr_fifo_push_stream &mut stream[0] failed\r\n".as_ptr());
+            rust_print("rust_tos_chr_fifo_push_stream &mut stream[0] failed\r\n\0".as_ptr());
             return ;
         }
         
         count = rust_tos_chr_fifo_push_stream(&mut test_fifo_00 as *mut _, &mut stream_dummy[0], 1);
         if(count != 0){
             rust_print_i32(count);
-            rust_print("rust_tos_chr_fifo_push_stream &stream_dummy[0] failed\r\n".as_ptr());
+            rust_print("rust_tos_chr_fifo_push_stream &stream_dummy[0] failed\r\n\0".as_ptr());
             return ;
         }
         
         count = rust_tos_chr_fifo_is_full(&mut test_fifo_00 as *mut _);
         if(count != 1){
             rust_print_i32(count);
-            rust_print("rust_tos_chr_fifo_is_full failed\r\n".as_ptr());
+            rust_print("rust_tos_chr_fifo_is_full failed\r\n\0".as_ptr());
             return;
         }
         
         count = rust_tos_chr_fifo_pop_stream(&mut test_fifo_00 as *mut _, &mut stream_pop[0], 5);
         if(count != 5){
             rust_print_i32(count);
-            rust_print("rust_tos_chr_fifo_pop_stream &mut stream_pop[0] failed\r\n".as_ptr());
+            rust_print("rust_tos_chr_fifo_pop_stream &mut stream_pop[0] failed\r\n\0".as_ptr());
             return ;
         }
 
         count = rust_tos_chr_fifo_pop_stream(&mut test_fifo_00 as *mut _, &mut stream_pop[0], 1);
         if(count != 0){
             rust_print_i32(count);
-            rust_print("rust_tos_chr_fifo_pop_stream &mut stream_pop[0] failed\r\n".as_ptr());
+            rust_print("rust_tos_chr_fifo_pop_stream &mut stream_pop[0] failed\r\n\0".as_ptr());
             return ;
         }
 
         count = rust_tos_chr_fifo_is_empty(&mut test_fifo_00 as *mut _);
         if(count != 1){
             rust_print_i32(count);
-            rust_print("rust_tos_chr_fifo_is_empty failed\r\n".as_ptr());
+            rust_print("rust_tos_chr_fifo_is_empty failed\r\n\0".as_ptr());
             return ;
         }
 
-        rust_print("rust_test_tos_fifo_stream_push pass\r\n".as_ptr());
+        rust_print("rust_test_tos_fifo_stream_push pass\r\n\0".as_ptr());
     }
 }
 
