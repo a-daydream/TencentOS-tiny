@@ -77,7 +77,7 @@ pub extern "C" fn application_entry_rust() -> c_void {
         // rust_test_tos_mutex_create();
         // rust_test_tos_mutex_create_dyn();
         // rust_test_tos_mutex_destroy(); // some bug 
-        rust_test_tos_mutex_pend();
+        // rust_test_tos_mutex_pend();
         // ************************start tos mutex***************************
 
         //end
@@ -695,7 +695,7 @@ pub fn rust_test_tos_mutex_pend(){
         let mut test_task_00 = k_task_t::default();
         let  task_name =   "test_mutex_pend_task".as_ptr() as *mut c_char ;
         let  mut entry  : k_task_entry_t = Some(test_mutex_pend_task_entry);
-        let mut err  = rust_tos_task_create(&mut test_task_00 as *mut _, 
+        err  = rust_tos_task_create(&mut test_task_00 as *mut _, 
             task_name, entry, 
             &mut test_mutex_00 as *mut _ as *mut c_void, 
             3 as k_prio_t , 
@@ -712,12 +712,89 @@ pub fn rust_test_tos_mutex_pend(){
         }
 
         rust_tos_sleep_ms(1000);
-        rust_print("RUST: sleep after  post \r\n\0".as_ptr());    
+        rust_print("RUST: sleep after  post \r\n\0".as_ptr());   
 
+        err = rust_tos_mutex_destroy(&mut test_mutex_00 as *mut _);
+        err = rust_tos_task_destroy(&mut test_task_00 as *mut _);
         rust_print("RUST: rust_test_tos_mutex_pend pass \r\n\0".as_ptr());        
     }
 }
 
+
+unsafe extern "C" fn  test_mutex_pend_timed_task_entry(arg : *mut c_void) 
+{
+    let mut mutex = arg as *mut _ as *mut k_mutex_t;
+    let pend_time : k_tick_t = 2000;
+    let mut err = rust_test_tos_mutex_pend_timed(mutex,pend_time);
+    
+    if(err != K_ERR_NONE){
+        rust_print("RUST: rust_tos_mutex_pend failed\r\n\0".as_ptr());
+        return ;
+    }
+    rust_print("test_task_entry\r\n\0".as_ptr());
+    err = rust_tos_mutex_post(mutex);
+    if(err != K_ERR_NONE){
+        rust_print("RUST: rust_tos_mutex_post failed\r\n\0".as_ptr());
+        return ;
+    }
+    // rust_tos_sleep_ms(1000);
+    return ;
+}
+pub fn rust_test_tos_mutex_pend_timed(){
+    unsafe{
+        let mut  test_mutex_00 :  k_mutex_t = k_mutex_t::default();
+        let mut err = rust_tos_mutex_create(&mut test_mutex_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mutex_create failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        err = rust_tos_mutex_pend(&mut test_mutex_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mutex_pend failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        
+        let mut test_task_00 = k_task_t::default();
+        let  task_name =   "test_mutex_pend_timed_task_entry".as_ptr() as *mut c_char ;
+        let  mut entry  : k_task_entry_t = Some(test_mutex_pend_timed_task_entry);
+        let mut err  = rust_tos_task_create(&mut test_task_00 as *mut _, 
+            task_name, entry, 
+            &mut test_mutex_00 as *mut _ as *mut c_void, 
+            2 as k_prio_t , 
+            &mut test_task_stack_00[0], 
+            512, 
+            0);
+        
+
+        
+        let mut delay_ticks :  k_tick_t = 1000;
+        rust_tos_sleep_ms(rust_tos_tick2millisec(delay_ticks));
+        begin = rust_tos_tick2millisec(rust_tos_systick_get());
+        rust_print("RUST: after  1000 ticks\r\n\0".as_ptr());
+        rust_print_num(begin);
+
+        err = rust_tos_mutex_post(&mut test_mutex_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mutex_post failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        // delay_ticks :  k_tick_t = 1000;
+        // rust_tos_sleep_ms(rust_tos_tick2millisec(delay_ticks));
+        // begin = rust_tos_tick2millisec(rust_tos_systick_get());
+        // rust_print("RUST: after  2000 ticks\r\n\0".as_ptr());
+        // rust_print_num(begin);
+        
+        // err = rust_tos_mutex_post(&mut test_mutex_00 as *mut _);
+        // if(err != K_ERR_NONE){
+        //     rust_print("RUST: rust_tos_mutex_post failed\r\n\0".as_ptr());
+        //     return ;
+        // }
+        rust_print("RUST: rust_test_tos_mutex_pend_timed pass\r\n\0".as_ptr());
+    }
+}
 
 
 
