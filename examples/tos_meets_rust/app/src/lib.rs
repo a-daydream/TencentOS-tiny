@@ -78,6 +78,8 @@ pub extern "C" fn application_entry_rust() -> c_void {
         // rust_test_tos_mutex_create_dyn();
         // rust_test_tos_mutex_destroy(); // some bug 
         // rust_test_tos_mutex_pend();
+        // rust_test_tos_mutex_pend_timed(); //some bug
+        rust_test_tos_mutex_post();
         // ************************start tos mutex***************************
 
         //end
@@ -181,6 +183,7 @@ pub fn rust_test_tos_task_create(){
 extern "C" {
     #[no_mangle]
     static  mut k_idle_task : k_task_t;
+    static mut k_curr_task : *mut k_task_t;
 }
 pub fn rust_test_tos_task_destroy(){
     unsafe{
@@ -724,20 +727,17 @@ pub fn rust_test_tos_mutex_pend(){
 unsafe extern "C" fn  test_mutex_pend_timed_task_entry(arg : *mut c_void) 
 {
     let mut mutex = arg as *mut _ as *mut k_mutex_t;
-    let pend_time : k_tick_t = 2000;
-    let mut err = rust_test_tos_mutex_pend_timed(mutex,pend_time);
+    let pend_time : k_tick_t = 0u32;
+    rust_print_num(pend_time);
+    let mut err = rust_tos_mutex_pend_timed(mutex,pend_time);
     
     if(err != K_ERR_NONE){
         rust_print("RUST: rust_tos_mutex_pend failed\r\n\0".as_ptr());
         return ;
     }
     rust_print("test_task_entry\r\n\0".as_ptr());
-    err = rust_tos_mutex_post(mutex);
-    if(err != K_ERR_NONE){
-        rust_print("RUST: rust_tos_mutex_post failed\r\n\0".as_ptr());
-        return ;
-    }
-    // rust_tos_sleep_ms(1000);
+  
+    rust_tos_sleep_ms(1000);
     return ;
 }
 pub fn rust_test_tos_mutex_pend_timed(){
@@ -768,12 +768,40 @@ pub fn rust_test_tos_mutex_pend_timed(){
             0);
         
 
-        
-        let mut delay_ticks :  k_tick_t = 1000;
+        rust_print_num((*k_curr_task).prio as u32);
+        let mut delay_ticks :  k_tick_t = 4000u32;
+        rust_print("RUST: before  delay\r\n\0".as_ptr());
         rust_tos_sleep_ms(rust_tos_tick2millisec(delay_ticks));
-        begin = rust_tos_tick2millisec(rust_tos_systick_get());
-        rust_print("RUST: after  1000 ticks\r\n\0".as_ptr());
-        rust_print_num(begin);
+        rust_print("RUST: after  4000 ticks\r\n\0".as_ptr());
+        
+        
+        err = rust_tos_mutex_post(&mut test_mutex_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mutex_post failed\r\n\0".as_ptr());
+            return ;
+        }
+        rust_print_num((*k_curr_task).prio as u32);
+
+     
+        rust_print("RUST: rust_test_tos_mutex_pend_timed pass\r\n\0".as_ptr());
+    }
+}
+
+
+pub fn rust_test_tos_mutex_post(){
+    unsafe{
+        let mut  test_mutex_00 :  k_mutex_t = k_mutex_t::default();
+        let mut err = rust_tos_mutex_create(&mut test_mutex_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mutex_create failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        err = rust_tos_mutex_pend(&mut test_mutex_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mutex_pend failed\r\n\0".as_ptr());
+            return ;
+        }
 
         err = rust_tos_mutex_post(&mut test_mutex_00 as *mut _);
         if(err != K_ERR_NONE){
@@ -781,21 +809,27 @@ pub fn rust_test_tos_mutex_pend_timed(){
             return ;
         }
 
-        // delay_ticks :  k_tick_t = 1000;
-        // rust_tos_sleep_ms(rust_tos_tick2millisec(delay_ticks));
-        // begin = rust_tos_tick2millisec(rust_tos_systick_get());
-        // rust_print("RUST: after  2000 ticks\r\n\0".as_ptr());
-        // rust_print_num(begin);
-        
-        // err = rust_tos_mutex_post(&mut test_mutex_00 as *mut _);
-        // if(err != K_ERR_NONE){
-        //     rust_print("RUST: rust_tos_mutex_post failed\r\n\0".as_ptr());
-        //     return ;
-        // }
-        rust_print("RUST: rust_test_tos_mutex_pend_timed pass\r\n\0".as_ptr());
+        err = rust_tos_mutex_post(&mut test_mutex_00 as *mut _);
+        if(err != K_ERR_MUTEX_NOT_OWNER){
+            rust_print("RUST: rust_tos_mutex_post failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        err = rust_tos_mutex_post(&mut test_mutex_00 as *mut _);
+        if(err != K_ERR_MUTEX_NOT_OWNER){
+            rust_print("RUST: rust_tos_mutex_post failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        err = rust_tos_mutex_destroy(&mut test_mutex_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_mutex_destroy failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        rust_print("RUST: rust_test_tos_mutex_post pass\r\n\0".as_ptr());
     }
 }
-
 
 
 //****************************end  of tos mutex test************************
