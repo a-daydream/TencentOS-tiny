@@ -76,12 +76,18 @@ pub extern "C" fn application_entry_rust() -> c_void {
         // ************************start tos mutex***************************
         // rust_test_tos_mutex_create();
         // rust_test_tos_mutex_create_dyn();
-        // rust_test_tos_mutex_destroy(); // some bug 
+        // rust_test_tos_mutex_destroy(); 
         // rust_test_tos_mutex_pend();
         // rust_test_tos_mutex_pend_timed(); //some bug
-        rust_test_tos_mutex_post();
-        // ************************start tos mutex***************************
+        // rust_test_tos_mutex_post();
+        // ************************end tos mutex***************************
 
+        // ************************start tos sem***************************
+        // rust_test_tos_sem_create();
+        // rust_test_tos_sem_create_dyn();
+        // rust_test_tos_sem_destroy();
+        rust_test_tos_sem_pend();
+        // ************************end tos sem***************************
         //end
         
         // ************************start tos_chr_fifo_test***********************
@@ -515,10 +521,10 @@ pub fn rust_test_tos_mmblk_pool_create(){
 }
 
 pub fn rust_test_tos_mmblk_pool_destroy(){
-    let mut test_mmblk_pool_00 = k_mmblk_pool_t::default();
+    let mut  test_mmblk_pool_00 :  *mut *mut k_mmblk_pool_t = &mut 0 as *mut _ as *mut *mut k_mmblk_pool_t;
     unsafe{
-        let mut err = rust_tos_mmblk_pool_destroy(&mut test_mmblk_pool_00 as *mut _);
-        if (  err != K_ERR_OBJ_INVALID_ALLOC_TYPE ) {
+        let mut err = rust_tos_mmblk_pool_destroy(*test_mmblk_pool_00);
+        if (  err != K_ERR_OBJ_PTR_NULL ) {
             rust_print("RUST: rust_tos_mmblk_pool_destroy  failed\r\n\0".as_ptr());
             return ;
         }
@@ -608,8 +614,6 @@ pub fn rust_test_tos_mmblk_free(){
 //***************************end of  tos mmblk test****************************
 
 //****************************tos mutex test********************************
-
-
 pub fn rust_test_tos_mutex_create(){
     unsafe{
         let mut  test_mutex_00 :  k_mutex_t = k_mutex_t::default();
@@ -649,16 +653,12 @@ pub fn rust_test_tos_mutex_create_dyn(){
 
 pub fn rust_test_tos_mutex_destroy(){
     unsafe{
-
-        let mut  test_mutex_destroy :  k_mutex_t = k_mutex_t::default();
-    
-        let err = rust_tos_mutex_destroy(&mut test_mutex_destroy as *mut _);
-        rust_print_num(err as u32);
-        // if(err == K_ERR_OBJ_INVALID){
-        //     rust_print("RUST: rust_tos_mutex_destroy failed\r\n\0".as_ptr());
-        //     return ;
-        // }
-
+        let mut  test_mutex_destroy :  *mut *mut k_mutex_t = &mut 0 as *mut _ as *mut *mut k_mutex_t;
+        let err = rust_tos_mutex_destroy(*test_mutex_destroy);
+        if(err == K_ERR_OBJ_PTR_NULL){
+            rust_print("RUST: rust_tos_mutex_destroy failed\r\n\0".as_ptr());
+            return ;
+        }
         rust_print("RUST: rust_test_tos_mutex_destroy pass\r\n\0".as_ptr());
     }
 }
@@ -787,7 +787,6 @@ pub fn rust_test_tos_mutex_pend_timed(){
     }
 }
 
-
 pub fn rust_test_tos_mutex_post(){
     unsafe{
         let mut  test_mutex_00 :  k_mutex_t = k_mutex_t::default();
@@ -831,8 +830,183 @@ pub fn rust_test_tos_mutex_post(){
     }
 }
 
-
 //****************************end  of tos mutex test************************
+
+//****************************tos sem test********************************
+pub fn rust_test_tos_sem_create(){
+    unsafe{
+        let mut test_sem_00 : k_sem_t = k_sem_t::default();
+        let mut test_sem_01 : k_sem_t = k_sem_t::default();
+        let mut test_sem_02 : k_sem_t = k_sem_t::default();
+        let mut sem_cnt : k_sem_cnt_t = 0u16;
+        let mut err = rust_tos_sem_create(&mut test_sem_00 as *mut _,sem_cnt);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_create 00 failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        sem_cnt = 255u16;
+        let mut err = rust_tos_sem_create(&mut test_sem_01 as *mut _,sem_cnt);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_create 01 failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        sem_cnt = 65535u16;
+        let mut err = rust_tos_sem_create(&mut test_sem_02 as *mut _,sem_cnt);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_create 02 failed\r\n\0".as_ptr());
+            return ;
+        }
+        
+        let mut err = rust_tos_sem_destroy(&mut test_sem_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_destroy failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        let mut err = rust_tos_sem_destroy(&mut test_sem_01 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_destroy failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        let mut err = rust_tos_sem_destroy(&mut test_sem_02 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_destroy failed\r\n\0".as_ptr());
+            return ;
+        }
+        rust_print("RUST: rust_test_tos_sem_create pass\r\n\0".as_ptr());
+    }
+}
+
+pub fn rust_test_tos_sem_create_dyn(){
+    unsafe{
+        let mut test_sem_00 : k_sem_t = k_sem_t::default();
+        let mut  test_sem_00_ptr :  *mut *mut k_sem_t = &mut test_sem_00 as *mut _ as *mut *mut k_sem_t;
+        let mut test_sem_01 : k_sem_t = k_sem_t::default();
+        let mut  test_sem_01_ptr :  *mut *mut k_sem_t = &mut test_sem_01 as *mut _ as *mut *mut k_sem_t;
+        let mut test_sem_02 : k_sem_t = k_sem_t::default();
+        let mut  test_sem_02_ptr :  *mut *mut k_sem_t = &mut test_sem_02 as *mut _ as *mut *mut k_sem_t;
+
+
+        let mut sem_cnt : k_sem_cnt_t = 0u16;
+        let mut err = rust_tos_sem_create_dyn(test_sem_00_ptr,sem_cnt);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_create 00 failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        sem_cnt = 255u16;
+        let mut err = rust_tos_sem_create_dyn(test_sem_01_ptr,sem_cnt);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_create 01 failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        sem_cnt = 65535u16;
+        let mut err = rust_tos_sem_create_dyn(test_sem_02_ptr,sem_cnt);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_create 02 failed\r\n\0".as_ptr());
+            return ;
+        }
+        
+        let mut err = rust_tos_sem_destroy(*test_sem_00_ptr);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_destroy failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        let mut err = rust_tos_sem_destroy(*test_sem_01_ptr);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_destroy failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        let mut err = rust_tos_sem_destroy(*test_sem_02_ptr);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_destroy failed\r\n\0".as_ptr());
+            return ;
+        }
+        rust_print("RUST: rust_test_tos_sem_create_dyn pass\r\n\0".as_ptr());
+    }
+}
+
+pub fn rust_test_tos_sem_destroy(){
+    unsafe{
+        let mut  test_sem_00_ptr :  *mut *mut k_sem_t = &mut 0 as *mut _ as *mut *mut k_sem_t;
+        let mut err = rust_tos_sem_destroy(*test_sem_00_ptr);
+        if(err != K_ERR_OBJ_PTR_NULL){
+            rust_print("RUST: rust_tos_sem_destroy return K_ERR_OBJ_PTR_NULL\r\n\0".as_ptr());
+            return ;
+        }
+        rust_print("RUST: rust_test_tos_sem_destroy pass\r\n\0".as_ptr());
+    }
+}
+
+unsafe extern "C" fn  test_sem_pend_task_entry(arg : *mut c_void) 
+{
+    let mut sem = arg as *mut _ as *mut k_sem_t;
+    let mut sem_cnt : k_tick_t = u32::MAX - 1;
+
+    while (true) {
+        let mut err = rust_tos_sem_pend(sem,sem_cnt);
+        if(err != K_ERR_NONE && err != K_ERR_PEND_DESTROY){
+            rust_print("RUST: rust_tos_sem_pend failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        if(err == K_ERR_PEND_DESTROY){
+            rust_print("RUST: K_ERR_PEND_DESTROY \r\n\0".as_ptr());
+            rust_tos_sleep_ms(1000);
+            return ;
+        }
+        rust_print("test_task_entry\r\n\0".as_ptr());
+    }
+}
+pub fn rust_test_tos_sem_pend(){
+    unsafe{
+        let mut  test_sem_00 :  k_sem_t = k_sem_t::default();
+        let mut sem_cnt : k_sem_cnt_t = 0u16;
+        let mut err = rust_tos_sem_create(&mut test_sem_00 as *mut _,sem_cnt);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_create failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        // let mut cnt : k_tick_t = u32::MAX - 1;
+        // err = rust_tos_sem_pend(&mut test_sem_00 as *mut _,cnt);
+        // if(err != K_ERR_NONE){
+        //     rust_print("RUST: rust_tos_mutex_pend failed\r\n\0".as_ptr());
+        //     return ;
+        // }
+        
+        let mut test_task_00 = k_task_t::default();
+        let  task_name =   "test_sem_pend_task".as_ptr() as *mut c_char ;
+        let  mut entry  : k_task_entry_t = Some(test_sem_pend_task_entry);
+        err  = rust_tos_task_create(&mut test_task_00 as *mut _, 
+            task_name, entry, 
+            &mut test_sem_00 as *mut _ as *mut c_void, 
+            2 as k_prio_t , 
+            &mut test_task_stack_00[0], 
+            512, 
+            0);
+  
+        err = rust_tos_sem_post(&mut test_sem_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_post failed\r\n\0".as_ptr());
+            return ;
+        }
+  
+
+        err = rust_tos_sem_destroy(&mut test_sem_00 as *mut _);
+
+
+        err = rust_tos_task_destroy(&mut test_task_00 as *mut _);
+        rust_print("RUST: rust_test_tos_mutex_pend pass \r\n\0".as_ptr());    
+    }
+}
+//****************************end  of tos sem test************************
 
 //****************************tos completion test********************************
 //to do
