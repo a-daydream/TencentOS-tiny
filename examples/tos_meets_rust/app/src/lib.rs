@@ -30,13 +30,7 @@ pub extern "C" fn application_entry_rust() -> c_void {
         //     rust_oled_print(0,0,b"RUST: tos_mail create sucessful\0".as_ptr());
         // }
 
-        // let mut event =  k_event_t::default();
-        // let mut flag : k_event_flag_t = 0;
-        // if(rust_tos_event_create(&mut event as *mut _,flag) == K_ERR_NONE){
-        //     if(rust_tos_event_destroy(&mut event as *mut _) == K_ERR_NONE){
-        //         rust_oled_print(0,0,b"rust_tos_event_destroy xxxx\0".as_ptr());
-        //     }
-        // }
+      
 
         // let time_forever : k_tick_t = u32::MAX;
         // let time_nowait : k_tick_t = 0u32;
@@ -86,10 +80,18 @@ pub extern "C" fn application_entry_rust() -> c_void {
         // rust_test_tos_sem_create();
         // rust_test_tos_sem_create_dyn();
         // rust_test_tos_sem_destroy();
-        rust_test_tos_sem_pend();
+        // rust_test_tos_sem_pend();
+        // rust_test_tos_sem_pend_timed(); //some bug
+        // rust_test_tos_sem_post_all(); // some bug
         // ************************end tos sem***************************
         //end
         
+        // ************************start tos event***************************
+        // rust_test_tos_event_create();
+        // rust_test_tos_event_destroy();
+        rust_test_tos_event_pend_all();
+        // ************************end tos event***************************
+
         // ************************start tos_chr_fifo_test***********************
         // rust_test_tos_fifo_create();
         // rust_test_tos_fifo_destory();
@@ -950,6 +952,7 @@ unsafe extern "C" fn  test_sem_pend_task_entry(arg : *mut c_void)
     let mut sem_cnt : k_tick_t = u32::MAX - 1;
 
     while (true) {
+
         let mut err = rust_tos_sem_pend(sem,sem_cnt);
         if(err != K_ERR_NONE && err != K_ERR_PEND_DESTROY){
             rust_print("RUST: rust_tos_sem_pend failed\r\n\0".as_ptr());
@@ -962,6 +965,7 @@ unsafe extern "C" fn  test_sem_pend_task_entry(arg : *mut c_void)
             return ;
         }
         rust_print("test_task_entry\r\n\0".as_ptr());
+        rust_tos_sleep_ms(1000);
     }
 }
 pub fn rust_test_tos_sem_pend(){
@@ -1006,7 +1010,305 @@ pub fn rust_test_tos_sem_pend(){
         rust_print("RUST: rust_test_tos_mutex_pend pass \r\n\0".as_ptr());    
     }
 }
+
+unsafe extern "C" fn  test_sem_pend_timed_task_entry(arg : *mut c_void) 
+{
+    let mut sem = arg as *mut _ as *mut k_sem_t;
+    let pend_time : k_tick_t = 100u32;
+    rust_print("start to pend\r\n\0".as_ptr());
+    let mut err = rust_tos_sem_pend(sem,pend_time);
+    
+    if(err != K_ERR_NONE){
+        rust_print("RUST: rust_tos_sem_pend failed\r\n\0".as_ptr());
+        return ;
+    }
+    rust_print("test_task_entry\r\n\0".as_ptr());
+  
+    rust_tos_sleep_ms(1000);
+    return ;
+}
+pub fn rust_test_tos_sem_pend_timed(){
+    unsafe{
+        let mut  test_sem_00 :  k_sem_t = k_sem_t::default();
+        let mut sem_cnt : k_sem_cnt_t = 0u16;
+        let mut err = rust_tos_sem_create(&mut test_sem_00 as *mut _,sem_cnt);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_create failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        // let mut cnt : k_tick_t = u32::MAX - 1;
+        // err = rust_tos_sem_pend(&mut test_sem_00 as *mut _,cnt);
+        // if(err != K_ERR_NONE){
+        //     rust_print("RUST: rust_tos_sem_pend failed\r\n\0".as_ptr());
+        //     return ;
+        // }
+        
+        let mut test_task_00 = k_task_t::default();
+        let  task_name =   "test_sem_pend_timed_task".as_ptr() as *mut c_char ;
+        let  mut entry  : k_task_entry_t = Some(test_sem_pend_timed_task_entry);
+        err  = rust_tos_task_create(&mut test_task_00 as *mut _, 
+            task_name, entry, 
+            &mut test_sem_00 as *mut _ as *mut c_void, 
+            2 as k_prio_t , 
+            &mut test_task_stack_00[0], 
+            512, 
+            0);
+            
+        rust_print_num((*k_curr_task).prio as u32);
+        let mut delay_ticks :  k_tick_t = 4000u32;
+        rust_print("RUST: before  delay\r\n\0".as_ptr());
+        rust_tos_sleep_ms(rust_tos_tick2millisec(delay_ticks));
+        rust_print("RUST: after  4000 ticks\r\n\0".as_ptr());
+
+        err = rust_tos_sem_post(&mut test_sem_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_post failed\r\n\0".as_ptr());
+            return ;
+        }
+  
+
+        err = rust_tos_sem_destroy(&mut test_sem_00 as *mut _);
+
+
+        err = rust_tos_task_destroy(&mut test_task_00 as *mut _);
+        rust_print("RUST: rust_test_tos_sem_pend_timed pass \r\n\0".as_ptr());    
+    }
+}
+
+unsafe extern "C" fn  test_sem_postall_entry(arg : *mut c_void) 
+{
+    let mut sem = arg as *mut _ as *mut k_sem_t;
+    let mut sem_cnt : k_tick_t = u32::MAX - 1;
+
+    
+    let mut err = rust_tos_sem_pend(sem,sem_cnt);
+    rust_print_num((*k_curr_task).prio as u32);
+    if(err != K_ERR_NONE && err != K_ERR_PEND_DESTROY){
+        rust_print("RUST: rust_tos_sem_pend failed\r\n\0".as_ptr());
+        return ;
+    }
+
+    if(err == K_ERR_PEND_DESTROY){
+        rust_print("RUST: K_ERR_PEND_DESTROY \r\n\0".as_ptr());
+        rust_tos_sleep_ms(1000);
+        return ;
+    }
+    rust_print("test_task_entry\r\n\0".as_ptr());
+    rust_tos_sleep_ms(1000);
+}
+pub fn rust_test_tos_sem_post_all(){
+    unsafe{
+        let mut  test_sem_00 :  k_sem_t = k_sem_t::default();
+        let mut sem_cnt : k_sem_cnt_t = 0u16;
+        let mut err = rust_tos_sem_create(&mut test_sem_00 as *mut _,sem_cnt);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_create failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        let mut test_task_00 = k_task_t::default();
+        let  task_name =   "test_task_00".as_ptr() as *mut c_char ;
+        let  mut entry  : k_task_entry_t = Some(test_sem_postall_entry);
+        err  = rust_tos_task_create(&mut test_task_00 as *mut _, 
+            task_name, entry, 
+            &mut test_sem_00 as *mut _ as *mut c_void, 
+            2 as k_prio_t , 
+            &mut test_task_stack_00[0], 
+            512, 
+            0);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_task_create failed\r\n\0".as_ptr());
+            return ;
+        }
+        
+        let mut test_task_01 = k_task_t::default();
+        let  task_name =   "test_task_01".as_ptr() as *mut c_char ;
+        err  = rust_tos_task_create(&mut test_task_01 as *mut _, 
+            task_name, entry, 
+            &mut test_sem_00 as *mut _ as *mut c_void, 
+            2 as k_prio_t , 
+            &mut test_task_stack_01[0], 
+            512, 
+            0);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_task_create failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        // let mut test_task_02 = k_task_t::default();
+        // let  task_name =   "test_task_02".as_ptr() as *mut c_char ;
+        // let  mut entry  : k_task_entry_t = Some(test_sem_pend_task_entry);
+        // err  = rust_tos_task_create(&mut test_task_01 as *mut _, 
+        //     task_name, entry, 
+        //     &mut test_sem_00 as *mut _ as *mut c_void, 
+        //     2 as k_prio_t , 
+        //     &mut test_task_stack_02[0], 
+        //     512, 
+        //     0);
+        // if(err != K_ERR_NONE){
+        //     rust_print("RUST: rust_tos_task_create failed\r\n\0".as_ptr());
+        //     return ;
+        // }
+
+        rust_print("RUST: before rust_tos_sem_post_all \r\n\0".as_ptr());
+        err = rust_tos_sem_post_all(&mut test_sem_00 as *mut _);
+        rust_print_num(err as u32);
+        err = rust_tos_sem_post(&mut test_sem_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_sem_post_all failed\r\n\0".as_ptr());
+            return ;
+        }
+        // err = rust_tos_sem_post(&mut test_sem_00 as *mut _);
+        // if(err != K_ERR_NONE){
+        //     rust_print("RUST: rust_tos_sem_post failed\r\n\0".as_ptr());
+        //     return ;
+        // }
+
+        err = rust_tos_task_destroy(&mut test_task_00 as *mut _);
+        err = rust_tos_task_destroy(&mut test_task_01 as *mut _);
+        // err = rust_tos_task_destroy(&mut test_task_02 as *mut _);
+
+        err = rust_tos_sem_destroy(&mut test_sem_00 as *mut _);
+        rust_print("RUST: rust_tos_sem_post_all pass\r\n\0".as_ptr());
+    }
+}
+
 //****************************end  of tos sem test************************
+
+//****************************tos event test********************************
+pub fn rust_test_tos_event_create(){
+    unsafe{
+        let mut test_event_00 : k_event_t = k_event_t::default();
+        let mut test_event_01 : k_event_t = k_event_t::default();
+        let mut test_event_02 : k_event_t = k_event_t::default();
+        let flag1 : k_event_flag_t = 0;
+        let flag2 : k_event_flag_t = 255;
+        let flag3 : k_event_flag_t = 65535;
+
+        let mut err = rust_tos_event_create(&mut test_event_00 as *mut _, flag1);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_event_create failed\r\n\0".as_ptr());
+            return ;
+        }
+        err = rust_tos_event_create(&mut test_event_01 as *mut _, flag2);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_event_create failed\r\n\0".as_ptr());
+            return ;
+        }
+        err = rust_tos_event_create(&mut test_event_02 as *mut _, flag3);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_event_create failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        err =rust_tos_event_destroy(&mut test_event_00 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_event_destroy failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        err =rust_tos_event_destroy(&mut test_event_01 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_event_destroy failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        err =rust_tos_event_destroy(&mut test_event_02 as *mut _);
+        if(err != K_ERR_NONE){
+            rust_print("RUST: rust_tos_event_destroy failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        rust_print("RUST: rust_test_tos_event_create pass\r\n\0".as_ptr());
+    }
+}
+
+pub fn rust_test_tos_event_destroy(){
+    unsafe{
+        let mut  test_event_00_ptr :  *mut *mut k_event_t = &mut 0 as *mut _ as *mut *mut k_event_t;
+        let mut err = rust_tos_event_destroy(*test_event_00_ptr);
+        if(err != K_ERR_OBJ_PTR_NULL){
+            rust_print("RUST: rust_tos_event_destroy return K_ERR_OBJ_PTR_NULL\r\n\0".as_ptr());
+            return ;
+        }
+        rust_print("RUST: rust_test_tos_event_destroy pass\r\n\0".as_ptr());
+    }
+}
+
+
+static event_expect_00 : k_event_flag_t = (1 << 0) as k_event_flag_t;
+static event_expect_01 : k_event_flag_t = (1 << 1) as k_event_flag_t;
+static event_expect_02 : k_event_flag_t = (1 << 2) as k_event_flag_t;
+static event_expect_dummy : k_event_flag_t = (1 << 3) as k_event_flag_t;
+unsafe extern "C" fn  test_event_pend_all_task_entry(arg : *mut c_void) 
+{
+    let mut event = arg as *mut _ as *mut k_event_t;
+    let mut flag_match : k_event_flag_t = 0 as k_event_flag_t;
+    let timeout = u32::MAX  - 1;
+    let tos_opt_all : k_opt_t = 0x0001 as k_opt_t;
+    let tos_opt_clr : k_opt_t = 0x0004 as k_opt_t;
+
+    // while (true){
+    rust_print("before pend\r\n\0".as_ptr());
+    let mut err = rust_tos_event_pend(event,  (event_expect_00 | event_expect_01 | event_expect_02), &mut flag_match, timeout,(tos_opt_all | tos_opt_clr));
+    rust_print_num(err as u32);
+    // if(err != K_ERR_NONE ){
+    //     rust_print("RUST: rust_tos_event_pend failed\r\n\0".as_ptr());
+    //     return ;
+    // }
+    rust_print("test_task_entry\r\n\0".as_ptr());
+    // rust_tos_task_yield();
+        rust_tos_sleep_ms(1000);
+    // }
+
+}
+pub fn rust_test_tos_event_pend_all(){
+    unsafe{
+        let mut test_event_00 : k_event_t = k_event_t::default();
+        let mut err = rust_tos_event_create(&mut test_event_00 as *mut _, 0);
+        if(err != K_ERR_NONE ){
+            rust_print("RUST: rust_tos_event_create failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        let mut test_task_00 = k_task_t::default();
+        let  task_name =   "test_event_pend_all".as_ptr() as *mut c_char ;
+        let  mut entry  : k_task_entry_t = Some(test_event_pend_all_task_entry);
+        err  = rust_tos_task_create(&mut test_task_00 as *mut _, 
+            task_name, entry, 
+            &mut test_event_00 as *mut _ as *mut c_void, 
+            2 as k_prio_t , 
+            &mut test_task_stack_00[0], 
+            512, 
+            0);
+        if(err != K_ERR_NONE ){
+            rust_print("RUST: rust_tos_task_create failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        rust_print("RUST: before event_expect_00\r\n\0".as_ptr());
+        rust_tos_event_post(&mut test_event_00 as *mut _, event_expect_00 | event_expect_01 | event_expect_02 );
+        rust_tos_sleep_ms(1000);
+
+        // rust_print("RUST: before event_expect_dummy\r\n\0".as_ptr());
+        // rust_tos_event_post(&mut test_event_00 as *mut _, event_expect_dummy);
+        // rust_tos_sleep_ms(1000);
+
+        // rust_print("RUST: before event_expect_00\r\n\0".as_ptr());
+        // rust_tos_event_post(&mut test_event_00 as *mut _, event_expect_00);
+        // rust_tos_sleep_ms(1000);
+  
+        rust_tos_event_destroy(&mut test_event_00 as *mut _);
+        if(err != K_ERR_NONE ){
+            rust_print("RUST: rust_tos_event_destroy failed\r\n\0".as_ptr());
+            return ;
+        }
+
+        rust_print("RUST: rust_test_tos_event_pend_all pass\r\n\0".as_ptr());
+    }
+}
+//****************************end  of tos event test************************
 
 //****************************tos completion test********************************
 //to do
