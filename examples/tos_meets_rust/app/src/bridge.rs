@@ -1143,7 +1143,7 @@ extern {
         timeslice: k_timeslice_t,
     ) -> k_err_t;
 
-    pub fn rust_tos_task_delay(delay: k_tick_t) -> k_err_t;
+    pub fn rust_tos_task_delay(delay:*mut  k_tick_t) -> k_err_t;
 
     pub fn rust_tos_task_delay_abort(task: *mut k_task_t) -> k_err_t;
 
@@ -1225,7 +1225,7 @@ extern {
 
     pub fn rust_tos_mutex_destroy(mutex: *mut k_mutex_t) -> k_err_t;
 
-    pub fn rust_tos_mutex_pend_timed(mutex: *mut k_mutex_t, timeout: k_tick_t) -> k_err_t;
+    pub fn rust_tos_mutex_pend_timed(mutex: *mut k_mutex_t, timeout:*mut k_tick_t) -> k_err_t;
 
     pub fn rust_tos_mutex_pend(mutex: *mut k_mutex_t) -> k_err_t;
 
@@ -1255,7 +1255,7 @@ extern {
         mail_q: *mut k_mail_q_t,
         mail_buf: *mut ::core::ffi::c_void,
         mail_size: *mut size_t,
-        timeout: k_tick_t,
+        timeout: *mut k_tick_t,
     ) -> k_err_t;
     pub fn rust_tos_mail_q_post(
         mail_q: *mut k_mail_q_t,
@@ -1427,8 +1427,8 @@ extern {
 //***************************  tos timer **************************************** 
     pub fn rust_tos_timer_create(
         tmr: *mut k_timer_t,
-        delay: k_tick_t,
-        period: k_tick_t,
+        delay:*mut k_tick_t,
+        period:*mut  k_tick_t,
         callback: k_timer_callback_t,
         cb_arg: *mut ::core::ffi::c_void,
         opt: k_opt_t,
@@ -1494,7 +1494,7 @@ extern {
         event: *mut k_event_t,
         flag_expect: k_event_flag_t,
         flag_match: *mut k_event_flag_t,
-        timeout: k_tick_t,
+        timeout:*mut k_tick_t,
         opt_pend: k_opt_t,
     ) -> k_err_t;
 
@@ -1520,7 +1520,7 @@ extern {
 
     pub fn rust_tos_sem_destroy(sem: *mut k_sem_t) -> k_err_t;
 
-    pub fn rust_tos_sem_pend(sem: *mut k_sem_t, timeout: k_tick_t) -> k_err_t;
+    pub fn rust_tos_sem_pend(sem: *mut k_sem_t, timeout:*mut  k_tick_t) -> k_err_t;
 
     pub fn rust_tos_sem_post(sem: *mut k_sem_t) -> k_err_t;
 
