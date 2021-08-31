@@ -1151,11 +1151,11 @@ void rust_print_char(const char *msg) {
 
 
 void rust_print_num(size_t num){
-    printf("this num = %d\n",num);
+    printf("this num = %d\r\n",num);
 }
 
 void rust_print_i32(int num){
-    printf("this num = %d\n",num);
+    printf("this num = %d\r\n",num);
 }
 
 
