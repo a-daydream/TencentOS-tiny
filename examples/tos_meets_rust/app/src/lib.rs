@@ -34,10 +34,7 @@ pub extern "C" fn application_entry_rust() -> c_void {
         // rust_test_tos_task_yeild();
         //*************************end of tos_task_test**************************
         
-        //to test
-        // ************************start tos mmheap***************************
-        // to do
-        //*************************end of tos mmheap**************************
+  
         
         // ************************start tos mmblk***************************
         // rust_test_tos_mmblk_pool_create();
@@ -69,7 +66,7 @@ pub extern "C" fn application_entry_rust() -> c_void {
         // rust_test_tos_event_create();
         // rust_test_tos_event_destroy();
         // rust_test_tos_event_pend_all();
-        rust_test_tos_event_pend_any();
+        // rust_test_tos_event_pend_any();
         // rust_test_tos_event_pend_timed(); 
         // rust_test_tos_event_post_keep();
         // ************************end tos event***************************
@@ -88,11 +85,33 @@ pub extern "C" fn application_entry_rust() -> c_void {
         // rust_test_tos_timer_create();
         // rust_test_tos_timer_destroy();
         // rust_test_tos_timer_stop(); // some bug
-        // rust_test_tos_timer_oneshot_functional();
+        rust_test_tos_timer_oneshot_functional();
         // rust_test_tos_timer_periodic_functional();// some bug 
 
         // ************************end tos timer***************************
 
+
+        // ************************start tos message queue***************************
+        // rust_test_tos_message_queue_create();
+        // rust_test_tos_message_queue_destroy();
+        // rust_test_tos_message_queue_pend(); // some bug
+        // ************************end tos message queue***************************
+
+        // ************************start tos_chr_fifo_test***********************
+        // rust_test_tos_fifo_create();
+        // rust_test_tos_fifo_destory();
+        // rust_test_tos_fifo_char_push();
+        // rust_test_tos_fifo_char_push_dyn();
+        // rust_test_tos_fifo_stream_push();
+        
+        //*************************end of tos_chr_fifo_test**********************
+
+
+
+              //to test
+        // ************************start tos mmheap***************************
+        // to do
+        //*************************end of tos mmheap**************************
         //****************************start tos ring_q test********************************
         // to do
         //****************************end  tos ring_q test********************************
@@ -112,21 +131,6 @@ pub extern "C" fn application_entry_rust() -> c_void {
         // ************************start tos rwlock***************************
         // todo 
         // ************************end tos rwlock***************************
-
-        // ************************start tos message queue***************************
-        // rust_test_tos_message_queue_create();
-        // rust_test_tos_message_queue_destroy();
-        // rust_test_tos_message_queue_pend(); // some bug
-        // ************************end tos message queue***************************
-
-        // ************************start tos_chr_fifo_test***********************
-        // rust_test_tos_fifo_create();
-        // rust_test_tos_fifo_destory();
-        // rust_test_tos_fifo_char_push();
-        // rust_test_tos_fifo_char_push_dyn();
-        // rust_test_tos_fifo_stream_push();
-        
-        //*************************end of tos_chr_fifo_test**********************
 
         // rust_sleep(5000u32);
         // rust_mqtt_daemon();
@@ -1492,27 +1496,18 @@ unsafe extern "C" fn  test_event_pend_timed_task_entry(arg : *mut c_void)
     let timeout = 100 as *mut  k_tick_t;
     let tos_opt_any : k_opt_t = 0x0001 as k_opt_t;
     let tos_opt_clr : k_opt_t = 0x0004 as k_opt_t;
-    let time_forever :*mut  k_tick_t = (u32::MAX) as *mut  k_tick_t; 
     let mut event = arg as *mut _ as *mut k_event_t;
     while (true){
         
         rust_print("before pend\r\n\0".as_ptr());
         let mut err = rust_tos_event_pend(event,  (event_expect_00 | event_expect_01 | event_expect_02), &mut flag_match, timeout,(tos_opt_any | tos_opt_clr));
-        rust_print_num(err as u32);
-        
+
         if(err == K_ERR_PEND_TIMEOUT){
             rust_print("RUST: rust_tos_event_pend return K_ERR_PEND_TIMEOUT\r\n\0".as_ptr());
             return ;
         }
-        // if (err == K_ERR_PEND_DESTROY) {
-        //     rust_tos_task_delay(time_forever);
-        // }
-        // if(err != K_ERR_NONE ){
-        //     rust_print("RUST: rust_tos_event_pend failed\r\n\0".as_ptr());
-        //     return ;
-        // }
         rust_print("test_task_entry\r\n\0".as_ptr());
-        // rust_tos_task_yield();
+
     }
 
 }
@@ -1540,31 +1535,14 @@ pub fn rust_test_tos_event_pend_timed(){
             return ;
         }
 
-        rust_print_num((*k_curr_task).prio as u32);
+ 
         let mut delay_ticks :  k_tick_t = 2000u32;
         rust_print("RUST: before  delay\r\n\0".as_ptr());
         rust_tos_sleep_ms(rust_tos_tick2millisec(delay_ticks));
         rust_print("RUST: after  2000 ticks\r\n\0".as_ptr());
 
-        // err = rust_tos_event_post(&mut test_event_00 as *mut _,event_expect_00 | event_expect_01 | event_expect_02);
-        // if(err != K_ERR_NONE){
-        //     rust_print("RUST: rust_tos_event_post failed\r\n\0".as_ptr());
-        //     return ;
-        // }
-        // rust_print("RUST: after  rust_tos_event_post\r\n\0".as_ptr());
 
-        err = rust_tos_event_post(&mut test_event_00 as *mut _,event_expect_00);
-        if(err != K_ERR_NONE){
-            rust_print("RUST: rust_tos_event_post failed\r\n\0".as_ptr());
-            return ;
-        }
 
-        // err = rust_tos_event_post(&mut test_event_00 as *mut _,event_expect_00);
-        // if(err != K_ERR_NONE){
-        //     rust_print("RUST: rust_tos_event_post failed\r\n\0".as_ptr());
-        //     return ;
-        // }
-        rust_print("RUST: before destroy\r\n\0".as_ptr());
         err =rust_tos_event_destroy(&mut test_event_00 as *mut _);
         if(err != K_ERR_NONE ){
             rust_print("RUST: rust_tos_event_destroy failed\r\n\0".as_ptr());
@@ -1582,29 +1560,22 @@ unsafe extern "C" fn  test_event_post_keep_task_entry(arg : *mut c_void)
 {
     
     let mut flag_match : k_event_flag_t = 0 as k_event_flag_t;
-    let timeout = 100u32 as k_tick_t;
-    let tos_opt_any : k_opt_t = 0x0001 as k_opt_t;
+
+    let tos_opt_all : k_opt_t = 0x0002 as k_opt_t;
     let tos_opt_clr : k_opt_t = 0x0004 as k_opt_t;
     let time_forever :*mut  k_tick_t = (u32::MAX ) as *mut  k_tick_t; 
     let mut event = arg as *mut _ as *mut k_event_t;
     while (true){
         
         rust_print("before pend\r\n\0".as_ptr());
-        let mut err = rust_tos_event_pend(event,  (event_expect_00 | event_expect_01 | event_expect_02), &mut flag_match, time_forever,(tos_opt_any | tos_opt_clr));
-        rust_print_num(err as u32);
-        
+        let mut err = rust_tos_event_pend(event,  (event_expect_00 | event_expect_01 | event_expect_02), &mut flag_match, time_forever,(tos_opt_all | tos_opt_clr));
 
         if (err == K_ERR_PEND_DESTROY) {
             rust_print("RUST: rust_tos_event_pend return K_ERR_PEND_DESTROY\r\n\0".as_ptr());
             return ;
         }
 
-        // if(err != K_ERR_NONE ){
-        //     rust_print("RUST: rust_tos_event_pend failed\r\n\0".as_ptr());
-        //     return ;
-        // }
         rust_print("test_task_entry\r\n\0".as_ptr());
-        rust_tos_sleep_ms(1000);
     }
 
 }
@@ -1960,10 +1931,9 @@ unsafe extern "C" fn  test_mail_queue_pend_timed_task_entry(arg : *mut c_void)
         }
         if(err == K_ERR_PEND_TIMEOUT){
             rust_print("pend mail_q: K_ERR_PEND_TIMEOUT\r\n\0".as_ptr());
+            return ;
         }
 
-        rust_print("test_task_entry\r\n\0".as_ptr());
-        rust_tos_sleep_ms(1000);
     }
 
 }
@@ -1994,13 +1964,7 @@ pub fn rust_test_tos_mail_queue_pend_timed(){
 
         let mut test_post : i32 = 2;
         rust_tos_sleep_ms(1000);
-        rust_print("RUST: before post \r\n\0".as_ptr());
 
-        rust_tos_mail_q_post(&mut test_mail_q_00 as *mut _,  &mut test_post as *mut _ as *mut c_void, 4);
-        if(err != K_ERR_NONE ){
-            rust_print("RUST: rust_tos_mail_q_post failed\r\n\0".as_ptr());
-            return ;
-        }
 
         err = rust_tos_mail_q_destroy(&mut test_mail_q_00 as *mut _);
         rust_print("RUST: rust_test_tos_mail_queue_pend_timed pass\r\n\0".as_ptr());
@@ -2559,7 +2523,6 @@ pub fn rust_test_tos_fifo_char_push(){
                 push_char = c as c_char;
                 err  = rust_tos_chr_fifo_push(&mut test_fifo_00 as *mut _, push_char);
                 if(err != K_ERR_NONE){
-                    rust_print_char(&push_char);
                     rust_print("RUST: rust_tos_chr_fifo_push failed\r\n\0".as_ptr());
                     return ;
                 }
@@ -2576,8 +2539,8 @@ pub fn rust_test_tos_fifo_char_push(){
             // pop
             for n in 1..6 {
                 err = rust_tos_chr_fifo_pop(&mut test_fifo_00 as *mut _, &mut data);
+                rust_print_char(&data);
                 if( err != K_ERR_NONE){
-                    rust_print_char(&data);
                     rust_print("RUST: rust_tos_chr_fifo_pop failed\r\n\0".as_ptr());
                     return ;
                 }
@@ -2639,6 +2602,7 @@ pub fn rust_test_tos_fifo_char_push_dyn(){
             // pop
             for n in 1..6 {
                 err = rust_tos_chr_fifo_pop(&mut test_fifo_00 as *mut _, &mut data);
+                rust_print_char(&data);
                 if( err != K_ERR_NONE){
                     rust_print("RUST: rust_tos_chr_fifo_pop full failed\r\n\0".as_ptr());
                     return ;
@@ -2659,7 +2623,7 @@ pub fn rust_test_tos_fifo_char_push_dyn(){
             }
             
         }
-        rust_print("RUST: rust_test_tos_fifo_char_push pass \r\n\0".as_ptr());
+        rust_print("RUST: rust_test_tos_fifo_char_push_dyn pass \r\n\0".as_ptr());
     }
 }
 
@@ -2708,7 +2672,11 @@ pub fn rust_test_tos_fifo_stream_push(){
             rust_print("rust_tos_chr_fifo_pop_stream &mut stream_pop[0] failed\r\n\0".as_ptr());
             return ;
         }
-
+        rust_print_char(&stream_pop[0]);
+        rust_print_char(&stream_pop[1]);
+        rust_print_char(&stream_pop[2]);
+        rust_print_char(&stream_pop[3]);
+        rust_print_char(&stream_pop[4]);
         count = rust_tos_chr_fifo_pop_stream(&mut test_fifo_00 as *mut _, &mut stream_pop[0], 1);
         if(count != 0){
             rust_print_i32(count);
