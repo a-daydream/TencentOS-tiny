@@ -23,7 +23,7 @@ pub extern "C" fn application_entry_rust() -> c_void {
        
 
 
-        // tos_meet_rust_daemon();
+        tos_meet_rust_daemon();
         // ************************start tos_task_test***************************
         // rust_test_tos_task_create();
         // rust_test_tos_task_destroy();
@@ -85,7 +85,7 @@ pub extern "C" fn application_entry_rust() -> c_void {
         // rust_test_tos_timer_create();
         // rust_test_tos_timer_destroy();
         // rust_test_tos_timer_stop(); // some bug
-        rust_test_tos_timer_oneshot_functional();
+        // rust_test_tos_timer_oneshot_functional();
         // rust_test_tos_timer_periodic_functional();// some bug 
 
         // ************************end tos timer***************************
